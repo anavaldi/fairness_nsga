@@ -77,10 +77,10 @@ class NSGA2Utils:
             while parent1 == parent2:
                 parent2 = self.__tournament(population)
             child1, child2 = self.__crossover(parent1, parent2)
-	    prob_mutation = random.uniform(0,1)
-	    if(prob_mutation >= 0.5):
-            	self.__mutate(child1)
-            	self.__mutate(child2)
+            prob_mutation = random.uniform(0, 1)
+            if(prob_mutation > 0.5):
+                self.__mutate(child1)
+                self.__mutate(child2)
             self.problem.calculate_objectives(child1)
             self.problem.calculate_objectives(child2)
             children.append(child1)
