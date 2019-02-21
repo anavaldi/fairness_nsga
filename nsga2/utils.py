@@ -13,6 +13,9 @@ class NSGA2Utils:
         self.crossover_param = crossover_param
         self.mutation_param = mutation_param
 
+	self.prob_mutation_child1 = random.uniform(0, 1)
+	self.prob_mutation_child2 = random.uniform(0, 1)
+
     def create_initial_population(self):
         population = Population()
         for _ in range(self.num_of_individuals):
@@ -69,7 +72,7 @@ class NSGA2Utils:
         else:
             return -1
 
-    def create_children(self, population):
+    def create_children(self, population, prob_mutation_child1, prob_mutation_child2):
         children = []
         while len(children) < len(population):
             parent1 = self.__tournament(population)
@@ -77,10 +80,10 @@ class NSGA2Utils:
             while parent1 == parent2:
                 parent2 = self.__tournament(population)
             child1, child2 = self.__crossover(parent1, parent2)
-	    prob_mutation = random.uniform(0,1)
-	    if(prob_mutation >= 0.5):
-            	self.__mutate(child1)
-            	self.__mutate(child2)
+            if(prob_mutation_child1 < 0.1):
+                self.__mutate(child1)
+            if(prob_mutation_child2 < 0.1):
+                self.__mutate(child2)
             self.problem.calculate_objectives(child1)
             self.problem.calculate_objectives(child2)
             children.append(child1)
@@ -92,13 +95,12 @@ class NSGA2Utils:
         child1 = self.problem.generate_individual()
         child2 = self.problem.generate_individual()
         num_of_features = len(child1.features)
-        genes_indexes = range(num_of_features)
-        for i in genes_indexes:
-            beta = self.__get_beta()
-            x1 = (individual1.features[i] + individual2.features[i])/2
-            x2 = abs((individual1.features[i] - individual2.features[i])/2)
-            child1.features[i] = x1 + beta*x2
-            child2.features[i] = x1 - beta*x2
+        gen_to_mutate = random.int(0, num_of_features-1)
+        beta = self.__get_beta()
+        x1 = (individual1.features[gen_to_mutate] + individual2.features[gen_to_mutate])/2
+        x2 = abs((individual1.features[gen_to_mutate] - individual2.features[fen_to_mutate])/2)
+        child1.features[gen_to_mutate] = x1 + beta*x2
+        child2.features[gen_to_mutate] = x1 - beta*x2
         return child1, child2
 
     def __get_beta(self):
