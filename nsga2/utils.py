@@ -103,7 +103,7 @@ class NSGA2Utils:
             else:
                 beta = self.__get_beta()
             x1 = (individual1.features[gen_to_mutate] + individual2.features[gen_to_mutate])/2
-            x2 = abs((individual1.features[gen_to_mutate] - individual2.features[fen_to_mutate])/2)
+            x2 = abs((individual1.features[gen_to_mutate] - individual2.features[gen_to_mutate])/2)
             child1.features[gen_to_mutate] = x1 + beta*x2
             child2.features[gen_to_mutate] = x1 - beta*x2
         return child1, child2
