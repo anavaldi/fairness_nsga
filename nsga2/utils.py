@@ -4,7 +4,7 @@ import random
 class NSGA2Utils:
 
     def __init__(self, problem, num_of_individuals=100,
-                 num_of_tour_particips=2, tournament_prob=0.9, crossover_param=2, mutation_param=5):
+                 num_of_tour_particips=2, tournament_prob=0.9, crossover_param=2, mutation_param=5, mutation_prob=0.1, beta_method='uniform'):
 
         self.problem = problem
         self.num_of_individuals = num_of_individuals
@@ -12,9 +12,8 @@ class NSGA2Utils:
         self.tournament_prob = tournament_prob
         self.crossover_param = crossover_param
         self.mutation_param = mutation_param
-
-	self.prob_mutation_child1 = random.uniform(0, 1)
-	self.prob_mutation_child2 = random.uniform(0, 1)
+        self.mutation_prob = mutation_prob
+        self.beta_method = beta_method
 
     def create_initial_population(self):
         population = Population()
@@ -72,17 +71,19 @@ class NSGA2Utils:
         else:
             return -1
 
-    def create_children(self, population, prob_mutation_child1, prob_mutation_child2):
+    def create_children(self, population, beta_method):
         children = []
         while len(children) < len(population):
             parent1 = self.__tournament(population)
             parent2 = parent1
             while parent1 == parent2:
                 parent2 = self.__tournament(population)
-            child1, child2 = self.__crossover(parent1, parent2)
-            if(prob_mutation_child1 < 0.1):
+            child1, child2 = self.__crossover(parent1, parent2, beta_method)
+            prob_mutation_child1 = random.uniform(0,1)
+            prob_mutation_child2 = random.uniform(0,1)
+            if(prob_mutation_child1 < mutation_prob):
                 self.__mutate(child1)
-            if(prob_mutation_child2 < 0.1):
+            if(prob_mutation_child2 < mutation_prob):
                 self.__mutate(child2)
             self.problem.calculate_objectives(child1)
             self.problem.calculate_objectives(child2)
@@ -91,16 +92,20 @@ class NSGA2Utils:
 
         return children
 
-    def __crossover(self, individual1, individual2):
+    def __crossover(self, individual1, individual2, beta_method):
         child1 = self.problem.generate_individual()
         child2 = self.problem.generate_individual()
         num_of_features = len(child1.features)
-        gen_to_mutate = random.int(0, num_of_features-1)
-        beta = self.__get_beta()
-        x1 = (individual1.features[gen_to_mutate] + individual2.features[gen_to_mutate])/2
-        x2 = abs((individual1.features[gen_to_mutate] - individual2.features[fen_to_mutate])/2)
-        child1.features[gen_to_mutate] = x1 + beta*x2
-        child2.features[gen_to_mutate] = x1 - beta*x2
+        gen_indexes = range(num_of_features)
+        for i in genes_indexes:
+            if beta_method == 'uniform':
+                beta = self.__get_beta_uniform()
+            else:
+                beta = self.__get_beta()
+            x1 = (individual1.features[gen_to_mutate] + individual2.features[gen_to_mutate])/2
+            x2 = abs((individual1.features[gen_to_mutate] - individual2.features[gen_to_mutate])/2)
+            child1.features[gen_to_mutate] = x1 + beta*x2
+            child2.features[gen_to_mutate] = x1 - beta*x2
         return child1, child2
 
     def __get_beta(self):
@@ -109,18 +114,22 @@ class NSGA2Utils:
             return (2*u)**(1/(self.crossover_param+1))
         return (2*(1-u))**(-1/(self.crossover_param+1))
 
-    def __mutate(self, child):
+    def __get_beta_uniform(self):
+        u = random.uniform(0, 0.5)
+        return u
+
+    def __mutate(self, child, prob_mutation):
         num_of_features = len(child.features)
-        for gene in range(num_of_features):
-            u, delta = self.__get_delta()
-            if u < 0.5:
-                child.features[gene] += delta*(child.features[gene] - self.problem.variables_range[gene][0])
-            else:
-                child.features[gene] += delta*(self.problem.variables_range[gene][1] - child.features[gene])
-            if child.features[gene] < self.problem.variables_range[gene][0]:
-                child.features[gene] = self.problem.variables_range[gene][0]
-            elif child.features[gene] > self.problem.variables_range[gene][1]:
-                child.features[gene] = self.problem.variables_range[gene][1]
+        gene = random.int(0, num_of_features-1)
+        u, delta = self.__get_delta()
+        if u < 0.5:
+            child.features[gene] += delta*(child.features[gene] - self.problem.variables_range[gene][0])
+        else:
+            child.features[gene] += delta*(self.problem.variables_range[gene][1] - child.features[gene])
+        if child.features[gene] < self.problem.variables_range[gene][0]:
+            child.features[gene] = self.problem.variables_range[gene][0]
+        elif child.features[gene] > self.problem.variables_range[gene][1]:
+            child.features[gene] = self.problem.variables_range[gene][1]
 
     def __get_delta(self):
         u = random.random()
