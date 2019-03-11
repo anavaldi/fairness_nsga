@@ -76,12 +76,26 @@ def get_matrices(df_name):
 
 def train_val_model(df_name):
     """
-    Train and test the classifier
+    Train and test the classifier.
     """
     X_train, X_val, X_test, y_train, y_val, y_test = get_matrices(df_name)
     clf = DecisionTreeClassifier(random_state = 15)
     y_pred = clf.fit(X_train, y_train).predict(X_val)
     return X_val, y_val, y_pred
+
+
+def split_protected(X, y, pred, protected_variable, protected_value):
+    """
+    Split datasets into (white, black), (male, female), etc.
+    """
+    df = pd.DataFrame({protected_variable: X[protected_variable], 'y_val': y, 'y_pred': pred})
+    df_p = df.loc[df[protected_variable] == protected_value]
+    df_u = df.loc[df[protected_variable] != protected_value]
+    y_val_p = df_p['y_val']
+    y_val_u = df_u['y_val']
+    y_pred_p = df_p['y_pred']
+    y_pred_u = df_u['y_pred']
+    return y_val_p, y_val_u, y_pred_p, y_pred_u
 
 def evaluate(X_val, y_val, y_pred, protected_variable):
     """
@@ -89,11 +103,7 @@ def evaluate(X_val, y_val, y_pred, protected_variable):
     """
 
     X_val, y_val, y_pred = train_test_model(df_name)
-    df_val = pd.DataFrame({protected_variable : X_val[protected_variable], 'y_val' : y_val, 'y_pred' : y_pred}) 
-    y_val_p = df_val[df_val.protected_variable == 1].y_val
-    y_val_u = df_val[df_val.protected_variable == 0].y_val
-    y_pred_p = df_val[df_val.protected_variable == 1].y_pred
-    y_pred_u = df_val[df_val.protected_variable == 0].y_pred
+    y_val_p, y_val_u, y_pred_p, y_pred_u = split_protected(X_val, y_val, y pred, variable, value)
 
     acc_p = accuracy(y_val_p, y_pred_p)
     acc_u = accuracy(y_val_u, y_pred_u)
@@ -101,8 +111,13 @@ def evaluate(X_val, y_val, y_pred, protected_variable):
     tpr_u = tpr(y_val_u, y_pred_u)
     tnr_p = tnr(y_val_p, y_pred_p)
     tnr_u = tnr(y_val_u, y_pred_u)
-    bcr_p = bcr(y_val_p, y_pred_p)
-    bcr_u = bcr(y_val_u, y_pred_u)
+
+    acc_fair = acc_u - acc_p
+    dem_fpr = tpr_u - tpr_p
+    dem_tnr = tnr_u - tnr_p
+    return acc_fair, dem_dpr, dem_tnr
+    
+
 
 
 
