@@ -22,6 +22,13 @@ class Problem:
 
     def calculate_objectives(self, individual):
         if self.expand:
+            individual = decode(*individual)
+            y = evaluate_fairness('adult', *individual, "sex")
+            acc = accuracy_diff(y[0], y[1], y[2], y[3])
+            dem_fp = dem_fpr(y[0], y[1], y[2], y[3])
             individual.objectives = [f(*individual.features) for f in self.objectives]
         else:
-            individual.objectives = [f(individual.features) for f in self.objectives]
+            individual = decode(individual)
+            acc_tpr_tnr = evaluate('adult', individual, "sex")
+            individual.objectives = [f(individual.features) for f in self.objectives] 
+

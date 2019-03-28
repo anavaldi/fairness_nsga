@@ -7,6 +7,7 @@ class Individual(object):
         self.dominated_solutions = None
         self.features = None
         self.objectives = None
+        
 
     def __eq__(self, other):
         if isinstance(self, other.__class__):
