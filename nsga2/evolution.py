@@ -3,19 +3,21 @@ from nsga2.population import Population
 
 class Evolution:
 
-    def __init__(self, problem, num_of_generations=1000, num_of_individuals=100, num_of_tour_particips=2, tournament_prob=0.9, crossover_param=2, mutation_param=5, mutation_prob=0.1, beta_method='uniform'):
-        self.utils = NSGA2Utils(problem, num_of_individuals, num_of_tour_particips, tournament_prob, crossover_param, mutation_param, beta_method)
+    def __init__(self, problem, num_of_generations=1000, num_of_individuals=50, num_of_tour_particips=2, tournament_prob=0.9, crossover_param=2, mutation_param=5, mutation_prob=0.1, beta_method="uniform"):
+        self.utils = NSGA2Utils(problem, num_of_individuals, num_of_tour_particips, tournament_prob, crossover_param, mutation_param, mutation_prob, beta_method)
         self.population = None
         self.num_of_generations = num_of_generations
         self.on_generation_finished = []
         self.num_of_individuals = num_of_individuals
+        self.mutation_prob = mutation_prob
+        self.beta_method = beta_method
 
     def evolve(self):
         self.population = self.utils.create_initial_population()
         self.utils.fast_nondominated_sort(self.population)
         for front in self.population.fronts:
             self.utils.calculate_crowding_distance(front)
-        children = self.utils.create_children(self.population, self.beta_method)
+        children = self.utils.create_children(self.population)
         returned_population = None
         for i in range(self.num_of_generations):
             self.population.extend(children)
@@ -34,5 +36,5 @@ class Evolution:
             self.utils.fast_nondominated_sort(self.population)
             for front in self.population.fronts:
                 self.utils.calculate_crowding_distance(front)
-            children = self.utils.create_children(self.population, self.beta_method)
+            children = self.utils.create_children(self.population)
         return returned_population.fronts[0]
