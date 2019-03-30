@@ -71,20 +71,20 @@ class NSGA2Utils:
         else:
             return -1
 
-    def create_children(self, population, beta_method):
+    def create_children(self, population):
         children = []
         while len(children) < len(population):
             parent1 = self.__tournament(population)
             parent2 = parent1
             while parent1 == parent2:
                 parent2 = self.__tournament(population)
-            child1, child2 = self.__crossover(parent1, parent2, beta_method)
+            child1, child2 = self.__crossover(parent1, parent2)
             prob_mutation_child1 = random.uniform(0,1)
             prob_mutation_child2 = random.uniform(0,1)
-            if(prob_mutation_child1 < mutation_prob):
-                self.__mutate(child1)
-            if(prob_mutation_child2 < mutation_prob):
-                self.__mutate(child2)
+            if(prob_mutation_child1 < self.mutation_prob):
+                self.__mutate(child1, self.mutation_prob)
+            if(prob_mutation_child2 < self.mutation_prob):
+                self.__mutate(child2, self.mutation_prob)
             self.problem.calculate_objectives(child1)
             self.problem.calculate_objectives(child2)
             children.append(child1)
@@ -92,20 +92,18 @@ class NSGA2Utils:
 
         return children
 
-    def __crossover(self, individual1, individual2, beta_method):
+    def __crossover(self, individual1, individual2):
         child1 = self.problem.generate_individual()
         child2 = self.problem.generate_individual()
-        num_of_features = len(child1.features)
-        gen_indexes = range(num_of_features)
-        for i in genes_indexes:
-            if beta_method == 'uniform':
+        for parameter in child1.features:
+            if self.beta_method == 'uniform':
                 beta = self.__get_beta_uniform()
             else:
                 beta = self.__get_beta()
-            x1 = (individual1.features[gen_to_mutate] + individual2.features[gen_to_mutate])/2
-            x2 = abs((individual1.features[gen_to_mutate] - individual2.features[gen_to_mutate])/2)
-            child1.features[gen_to_mutate] = x1 + beta*x2
-            child2.features[gen_to_mutate] = x1 - beta*x2
+            x1 = (individual1.features[parameter] + individual2.features[parameter])/2
+            x2 = abs((individual1.features[parameter] - individual2.features[parameter])/2)
+            child1.features[parameter] = x1 + beta*x2
+            child2.features[parameter] = x1 - beta*x2
         return child1, child2
 
     def __get_beta(self):
@@ -119,17 +117,19 @@ class NSGA2Utils:
         return u
 
     def __mutate(self, child, prob_mutation):
-        num_of_features = len(child.features)
-        gene = random.int(0, num_of_features-1)
+        hyperparameter = random.choice(list(child.features))
+        hyperparameter_index = list(child.features.keys()).index(hyperparameter)
+        print(hyperparameter)
+        print(hyperparameter_index)
         u, delta = self.__get_delta()
         if u < 0.5:
-            child.features[gene] += delta*(child.features[gene] - self.problem.variables_range[gene][0])
+            child.features[hyperparameter] += delta*(child.features[hyperparameter] - self.problem.variables_range[hyperparameter_index][0])
         else:
-            child.features[gene] += delta*(self.problem.variables_range[gene][1] - child.features[gene])
-        if child.features[gene] < self.problem.variables_range[gene][0]:
-            child.features[gene] = self.problem.variables_range[gene][0]
-        elif child.features[gene] > self.problem.variables_range[gene][1]:
-            child.features[gene] = self.problem.variables_range[gene][1]
+            child.features[hyperparameter] += delta*(self.problem.variables_range[hyperparameter_index][1] - child.features[hyperparameter])
+        if child.features[hyperparameter] < self.problem.variables_range[hyperparameter_index][0]:
+            child.features[hyperparameter] = self.problem.variables_range[hyperparameter_index][0]
+        elif child.features[hyperparameter] > self.problem.variables_range[hyperparameter_index][1]:
+            child.features[hyperparameter] = self.problem.variables_range[hyperparameter_index][1]
 
     def __get_delta(self):
         u = random.random()

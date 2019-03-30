@@ -3,37 +3,29 @@ import numpy as np
 from sklearn import preprocessing
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, accuracy_score
 import yaml
 
 
 
-with open('config_file.yaml', 'r') as f:
+with open('nsga2/config_file.yaml', 'r') as f:
     config = yaml.load(f)
 
 
-def normalize(x, a, b):
-    x = (x-a)/(b-a)
-    return x
-
-def decode(individual):
+def decode(**features):
     """
     Decoding hyperaparameters.
     """
-    individual['criterion'] = normalize(individual['criterion'], 0, 1) 
-    if(individual['criterion'] <= 0.5):
-       individual['criterion'] = "gini"
+ 
+    if(features['criterion'] <= 0.5):
+       features['criterion'] = "gini"
     else:
-       individual['criterion'] = "entropy"
+       features['criterion'] = "entropy"
 
-    individual['max_depth'] = int(normalize(individual['max_depth'], 0, 15))
-    individual['min_samples_split'] = normalize(individual['min_samples_split'], 0, 1)
-    individual['min_samples_leaf'] = normalize(individual['min_samples_leaf'], 0, 1)
-    individual['max_leaf_nodes'] = int(normalize(individual['max_leaf_nodes'], 0, 1000))
-    individual['min_impurity_decrease'] = normalize(individual['min_impurity_decrease'], 0, 1)
-    individual['class_weight'] = normalize(individual['class_weight'], 0, 1)
-    
-    return individual
+    features['max_depth'] = int(features['max_depth']+1)
+    features['max_leaf_nodes'] = int(features['max_leaf_nodes']+1)
+
+    return features
 
 def read_data(df_name):
     """
@@ -98,17 +90,18 @@ def get_matrices(df_name):
     X_train, X_val, y_train, y_val = train_test_split(X_train, y_train) 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
-def train_val_model(df_name, individual):
+def train_val_model(df_name, **features):
     """
     Train and test the classifier.
     """
+    print(features)
     X_train, X_val, X_test, y_train, y_val, y_test = get_matrices(df_name)
-    clf = DecisionTreeClassifier(random_state = 15, criterion = individual['criterion'], max_depth = individual['max_depth'], min_samples_split = individual['min_samples_split'], min_samples_leaf = individual['min_samples_leaf'], max_leaf_nodes = individual['max_leaf_nodes'], min_impurity_decrease = individual['min_impurity_decrease'], class_weight = individual['class_weight'])
+    clf = DecisionTreeClassifier(random_state = 15, criterion = features['criterion'], max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], min_samples_leaf = features['min_samples_leaf'], max_leaf_nodes = features['max_leaf_nodes'], min_impurity_decrease = features['min_impurity_decrease'], class_weight = {0:features['class_weight'], 1:(1-features['class_weight'])})
     y_pred = clf.fit(X_train, y_train).predict(X_val)
     return X_val, y_val, y_pred
 
 
-def split_protected(X, y, pred, protected_variable, protected_value = 0):
+def split_protected(X, y, pred, protected_variable, protected_value = 1):
     """
     Split datasets into (white, black), (male, female), etc.
     """
@@ -122,25 +115,22 @@ def split_protected(X, y, pred, protected_variable, protected_value = 0):
     y_pred_u = df_u['y_pred']
     return y_val_p, y_val_u, y_pred_p, y_pred_u
 
-def evaluate_fairness(df_name, individual, protected_variable):
+def evaluate_fairness(df_name, protected_variable, **features):
     """
     Evaluate the model with fairness data.
     """
 
-    X_val, y_val, y_pred = train_test_model(df_name, individual)
-    y_val_p, y_val_u, y_pred_p, y_pred_u = split_protected(X_val, y_val, pred, variable, value)
+    X_val, y_val, y_pred = train_val_model(df_name, **features)
+    y_val_p, y_val_u, y_pred_p, y_pred_u = split_protected(X_val, y_val, y_pred, 'sex', 1)
 
     return y_val_p, y_val_u, y_pred_p, y_pred_u
-
-
-def confusion_matrix
 
 def accuracy_diff(y_val_p, y_val_u, y_pred_p, y_pred_u):
     """
     Compute difference of accuracies.
     """
-    acc_p  = accuracy(y_val_p, y_pred_p)
-    acc_u = accuracy(y_val_u, y_pred_u)
+    acc_p  = accuracy_score(y_val_p, y_pred_p)
+    acc_u = accuracy_score(y_val_u, y_pred_u)
     acc_fair = abs(acc_u - acc_p)
     return acc_fair
 
@@ -148,15 +138,19 @@ def dem_fpr(y_val_p, y_val_u, y_pred_p, y_pred_u):
     """
     Compute demography metric.
     """
-    tpr_p = tpr(y_val_p, y_pred_p)
-    tpr_u = tpr(y_val_u, y_pred_u)
-    dem = abs(tpr_p, tpr_u)
+    tn_p, fp_p, fn_p, tp_p = confusion_matrix(y_val_p, y_pred_p).ravel() 
+    tn_u, fp_u, fn_u, tp_u = confusion_matrix(y_val_u, y_pred_u).ravel()
+    tpr_p = tp_p/(tp_p + fn_p)
+    tpr_u = tp_u/(tp_u + fn_u)
+    dem = abs(tpr_p - tpr_u)
     return dem
 
 def dem_tnr(y_val_p, y_val_u, y_pred_p, y_pred_u):
-    tnr_p = tnr(y_val_p, y_pred_p)
-    tnr_u = tnr(y_val_u, y_pred_u)
-    dem = abs(tnr_p, tnr_u)
+    tn_p, fp_p, fn_p, tp_p = confusion_matrix(y_val_p, y_pred_p).ravel()
+    tn_u, fp_u, fn_u, tp_u = confusion_matrix(y_val_u, y_pred_u).ravel()
+    tnr_p = tn_p/(tn_p + fp_p)
+    tnr_u = tn_u/(tn_u + fp_u)
+    dem = abs(tnr_p - tnr_u)
     return dem
 
 

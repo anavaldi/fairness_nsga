@@ -1,4 +1,5 @@
 from nsga2.individual import Individual
+from nsga2.ml import *
 import random
 
 class Problem:
@@ -18,17 +19,21 @@ class Problem:
     def generate_individual(self):
         individual = Individual()
         individual.features = [random.uniform(*x) for x in self.variables_range]
+        hyperparameters = ['criterion', 'max_depth', 'min_samples_split', 'min_samples_leaf', 'max_leaf_nodes', 'min_impurity_decrease', 'class_weight']
+        individual.features = dict(zip(hyperparameters, individual.features))
         return individual
 
     def calculate_objectives(self, individual):
         if self.expand:
-            individual = decode(*individual)
-            y = evaluate_fairness('adult', *individual, "sex")
+            hyperparameters = decode(**individual.features)
+            y = evaluate_fairness('adult','sex', **hyperparameters)
             acc = accuracy_diff(y[0], y[1], y[2], y[3])
             dem_fp = dem_fpr(y[0], y[1], y[2], y[3])
-            individual.objectives = [f(*individual.features) for f in self.objectives]
+            individual.objectives = [acc, dem_fp]
         else:
-            individual = decode(individual)
-            acc_tpr_tnr = evaluate('adult', individual, "sex")
-            individual.objectives = [f(individual.features) for f in self.objectives] 
+            hyperparameters = decode(**individual.features)
+            y = evaluate_fairness('adult', 'sex', **hyperparameters)
+            acc = accuracy_diff(y[0], y[1], y[2], y[3])
+            dem_fp = dem_fpr(y[0], y[1], y[3])
+            individual.objectives = [acc, dem_fp] 
 
