@@ -95,15 +95,15 @@ class NSGA2Utils:
     def __crossover(self, individual1, individual2):
         child1 = self.problem.generate_individual()
         child2 = self.problem.generate_individual()
-        for parameter in child1.features:
+        for hyperparameter in child1.features:
             if self.beta_method == 'uniform':
                 beta = self.__get_beta_uniform()
             else:
                 beta = self.__get_beta()
-            x1 = (individual1.features[parameter] + individual2.features[parameter])/2
-            x2 = abs((individual1.features[parameter] - individual2.features[parameter])/2)
-            child1.features[parameter] = x1 + beta*x2
-            child2.features[parameter] = x1 - beta*x2
+            x1 = (individual1.features[hyperparameter] + individual2.features[hyperparameter])/2
+            x2 = abs((individual1.features[hyperparameter] - individual2.features[hyperparameter])/2)
+            child1.features[hyperparameter] = x1 + beta*x2
+            child2.features[hyperparameter] = x1 - beta*x2
         return child1, child2
 
     def __get_beta(self):
@@ -119,8 +119,6 @@ class NSGA2Utils:
     def __mutate(self, child, prob_mutation):
         hyperparameter = random.choice(list(child.features))
         hyperparameter_index = list(child.features.keys()).index(hyperparameter)
-        print(hyperparameter)
-        print(hyperparameter_index)
         u, delta = self.__get_delta()
         if u < 0.5:
             child.features[hyperparameter] += delta*(child.features[hyperparameter] - self.problem.variables_range[hyperparameter_index][0])

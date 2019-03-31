@@ -3,7 +3,7 @@ from nsga2.population import Population
 
 class Evolution:
 
-    def __init__(self, problem, num_of_generations=1000, num_of_individuals=50, num_of_tour_particips=2, tournament_prob=0.9, crossover_param=2, mutation_param=5, mutation_prob=0.1, beta_method="uniform"):
+    def __init__(self, problem, num_of_generations=20, num_of_individuals=50, num_of_tour_particips=2, tournament_prob=0.9, crossover_param=2, mutation_param=5, mutation_prob=0.1, beta_method="uniform"):
         self.utils = NSGA2Utils(problem, num_of_individuals, num_of_tour_particips, tournament_prob, crossover_param, mutation_param, mutation_prob, beta_method)
         self.population = None
         self.num_of_generations = num_of_generations
