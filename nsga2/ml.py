@@ -5,7 +5,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, accuracy_score
 import yaml
-
+import math
 
 
 with open('nsga2/config_file.yaml', 'r') as f:
@@ -22,8 +22,9 @@ def decode(**features):
     else:
        features['criterion'] = "entropy"
 
-    features['max_depth'] = int(features['max_depth']+1)
-    features['max_leaf_nodes'] = int(features['max_leaf_nodes']+1)
+    features['max_depth'] = math.ceil(features['max_depth'])
+    features['max_leaf_nodes'] = math.ceil(features['max_leaf_nodes'])
+    features['min_samples_split'] = float(features['min_samples_split'])
 
     return features
 
@@ -115,15 +116,23 @@ def split_protected(X, y, pred, protected_variable, protected_value = 1):
     y_pred_u = df_u['y_pred']
     return y_val_p, y_val_u, y_pred_p, y_pred_u
 
-def evaluate_fairness(df_name, protected_variable, **features):
+def evaluate(df_name, protected_variable, **features):
     """
     Evaluate the model with fairness data.
     """
 
     X_val, y_val, y_pred = train_val_model(df_name, **features)
+
+    return X_val, y_val, y_pred
+
+def evaluate_fairness(X_val, y_val, y_pred):
     y_val_p, y_val_u, y_pred_p, y_pred_u = split_protected(X_val, y_val, y_pred, 'sex', 1)
 
     return y_val_p, y_val_u, y_pred_p, y_pred_u
+
+def accuracy_inv(y_val, y_pred):
+    err = 1 - accuracy_score(y_val, y_pred)
+    return err
 
 def accuracy_diff(y_val_p, y_val_u, y_pred_p, y_pred_u):
     """

@@ -19,7 +19,7 @@ class NSGA2Utils:
         population = Population()
         for _ in range(self.num_of_individuals):
             individual = self.problem.generate_individual()
-            self.problem.calculate_objectives(individual)
+            self.problem.calculate_objectives(individual, self.problem.results_df)
             population.append(individual)
         return population
 
@@ -85,25 +85,27 @@ class NSGA2Utils:
                 self.__mutate(child1, self.mutation_prob)
             if(prob_mutation_child2 < self.mutation_prob):
                 self.__mutate(child2, self.mutation_prob)
-            self.problem.calculate_objectives(child1)
-            self.problem.calculate_objectives(child2)
+            self.problem.calculate_objectives(child1, self.problem.results_df)
+            self.problem.calculate_objectives(child2, self.problem.results_df)
             children.append(child1)
             children.append(child2)
 
         return children
 
     def __crossover(self, individual1, individual2):
+        print("CROSSOVER:")
         child1 = self.problem.generate_individual()
         child2 = self.problem.generate_individual()
         for hyperparameter in child1.features:
+            hyperparameter_index = list(child1.features.keys()).index(hyperparameter)
             if self.beta_method == 'uniform':
                 beta = self.__get_beta_uniform()
             else:
                 beta = self.__get_beta()
             x1 = (individual1.features[hyperparameter] + individual2.features[hyperparameter])/2
             x2 = abs((individual1.features[hyperparameter] - individual2.features[hyperparameter])/2)
-            child1.features[hyperparameter] = x1 + beta*x2
-            child2.features[hyperparameter] = x1 - beta*x2
+            child1.features[hyperparameter] = max(min(self.problem.variables_range[hyperparameter_index][1], x1 + beta*x2), self.problem.variables_range[hyperparameter_index][0]) 
+            child2.features[hyperparameter] = max(min(self.problem.variables_range[hyperparameter_index][1], x1 - beta*x2), self.problem.variables_range[hyperparameter_index][0])
         return child1, child2
 
     def __get_beta(self):
@@ -117,6 +119,7 @@ class NSGA2Utils:
         return u
 
     def __mutate(self, child, prob_mutation):
+        print("MUTATION:")
         hyperparameter = random.choice(list(child.features))
         hyperparameter_index = list(child.features.keys()).index(hyperparameter)
         u, delta = self.__get_delta()
