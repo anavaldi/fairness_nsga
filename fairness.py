@@ -20,11 +20,13 @@ func = [i.objectives for i in evo.evolve()]
 print(func)
 
 #results = pd.read_csv('results.csv')
-#x = results['error']
-#y = results['dem_fp']
+#results.head()
+x = [i[0] for i in func]
+y = [i[1] for i in func]
+#y = results[[1]]
 
-#plt.xlabel('Error', fontsize=15)
-#plt.ylabel('Demography FPR', fontsize=15)
-#plt.grid(True)
-#plt.scatter(x, y)
-#plt.show()
+plt.xlabel('Error', fontsize=15)
+plt.ylabel('Demography FPR', fontsize=15)
+plt.grid(True)
+plt.scatter(x, y)
+plt.show()

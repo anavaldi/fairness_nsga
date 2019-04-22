@@ -21,28 +21,30 @@ class Problem:
     def generate_individual(self):
         individual = Individual()
         individual.features = [random.uniform(*x) for x in self.variables_range]
+        #print(individual.features)
         hyperparameters = ['criterion', 'max_depth', 'min_samples_split', 'min_samples_leaf', 'max_leaf_nodes', 'min_impurity_decrease', 'class_weight']
         individual.features = od(zip(hyperparameters, individual.features))
         return individual
 
     def calculate_objectives(self, individual, results_df):
+        #print(individual.features)
         if self.expand:
             hyperparameters = decode(**individual.features)
-            X, y, pred = evaluate('adult', 'sex', **hyperparameters)
+            X, y, pred = evaluate('german', 'age', **hyperparameters)
             y_fair = evaluate_fairness(X, y, pred)
             error = accuracy_inv(y, pred)
             dem_fp = dem_fpr(y_fair[0], y_fair[1], y_fair[2], y_fair[3])
             individual.objectives = [error, dem_fp]
             results_aux = pd.DataFrame({'individual': [hyperparameters], 'error': error, 'dem_fp': dem_fp})
             results_df = results_df.append(results_aux, ignore_index = True)
-            results_df.to_csv("results.csv", index = False, mode='a', header=False)
+            results_df.to_csv("./results/results_prueba.csv", index = False, mode='a', header=False)
         else:
             hyperparameters = decode(**individual.features)
-            X, y, pred = evaluate('adult', 'sex', **hyperparameters)
+            X, y, pred = evaluate('german', 'age', **hyperparameters)
             y_fair = evaluate_fairness(X, y, pred)
             error = accuracy_inv(y, pred)
             dem_fp = dem_fpr(y_fair[0], y_fair[1], y_fair[3])
-            individual.objectives = [error, dem_fp] 
+            individual.objectives = [error, dem_fp]
             results_aux = pd.DataFrame({'individual': [hyperparameters], 'error': error, 'dem_fp': dem_fp})
             results_df = results_df.append(results_aux, ignore_index = True)
             results_df.to_csv("results.csv", index=False, mode='a', header=False)

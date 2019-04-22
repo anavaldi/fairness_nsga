@@ -88,12 +88,10 @@ class NSGA2Utils:
             self.problem.calculate_objectives(child1, self.problem.results_df)
             self.problem.calculate_objectives(child2, self.problem.results_df)
             children.append(child1)
-            children.append(child2)
-
+            children.append(child2) 
         return children
 
     def __crossover(self, individual1, individual2):
-        print("CROSSOVER:")
         child1 = self.problem.generate_individual()
         child2 = self.problem.generate_individual()
         for hyperparameter in child1.features:
@@ -119,7 +117,6 @@ class NSGA2Utils:
         return u
 
     def __mutate(self, child, prob_mutation):
-        print("MUTATION:")
         hyperparameter = random.choice(list(child.features))
         hyperparameter_index = list(child.features.keys()).index(hyperparameter)
         u, delta = self.__get_delta()
