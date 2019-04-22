@@ -3,7 +3,7 @@ import random
 
 class NSGA2Utils:
 
-    def __init__(self, problem, num_of_individuals=100,
+    def __init__(self, problem, num_of_individuals=10,
                  num_of_tour_particips=2, tournament_prob=0.9, crossover_param=2, mutation_param=5, mutation_prob=0.1, beta_method='uniform'):
 
         self.problem = problem
@@ -19,7 +19,7 @@ class NSGA2Utils:
         population = Population()
         for _ in range(self.num_of_individuals):
             individual = self.problem.generate_individual()
-            self.problem.calculate_objectives(individual, self.problem.results_df)
+            self.problem.calculate_objectives(individual)
             population.append(individual)
         return population
 
@@ -85,8 +85,8 @@ class NSGA2Utils:
                 self.__mutate(child1, self.mutation_prob)
             if(prob_mutation_child2 < self.mutation_prob):
                 self.__mutate(child2, self.mutation_prob)
-            self.problem.calculate_objectives(child1, self.problem.results_df)
-            self.problem.calculate_objectives(child2, self.problem.results_df)
+            self.problem.calculate_objectives(child1)
+            self.problem.calculate_objectives(child2)
             children.append(child1)
             children.append(child2) 
         return children
