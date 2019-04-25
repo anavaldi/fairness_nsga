@@ -5,29 +5,42 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import confusion_matrix, accuracy_score
 import yaml
-import math
+from math import ceil
 import collections
-
 
 
 with open('nsga2/config_file.yaml', 'r') as f:
     config = yaml.load(f)
 
 
-def decode(**features):
+def decode(var_range, **features):
     """
     Decoding hyperaparameters.
     """
  
-    if(features['criterion'] <= 0.5):
-       features['criterion'] = "gini"
+    #if(features['criterion'] <= 0.5):
+    #   features['criterion'] = "gini"
+    #else:
+    #   features['criterion'] = "entropy"
+
+    if features['max_depth'] is not None:
+        features['max_depth'] = int(round(features['max_depth']))
     else:
-       features['criterion'] = "entropy"
+        features['max_depth'] = var_range[1][1]
 
-    features['max_depth'] = math.ceil(features['max_depth'])
-    features['max_leaf_nodes'] = math.ceil(features['max_leaf_nodes'])
-    features['min_samples_split'] = float(features['min_samples_split'])
+    features['min_samples_split'] = int(round(features['min_samples_split']))
 
+    features['min_samples_leaf'] = int(round(features['min_samples_leaf']))
+
+    if features['max_leaf_nodes'] is not None:
+        features['max_leaf_nodes'] = int(round(features['max_leaf_nodes']))
+    else:
+        features['max_leaf_nodes'] = var_range[4][1]
+    print("TYPE FEATURES")
+    print(type(features))
+    hyperparameters = ['criterion', 'max_depth', 'min_samples_split', 'min_samples_leaf', 'max_leaf_nodes', 'min_impurity_decrease', 'class_weight']
+    list_of_hyperparameters = [(hyperparameter, features[hyperparameter]) for hyperparameter in hyperparameters]
+    features = collections.OrderedDict(list_of_hyperparameters)
     return features
 
 def read_data(df_name):
@@ -89,7 +102,7 @@ def get_matrices(df_name):
         y =  np.where(y >=  70.000, 0, 1)
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state = 15)
-    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, random_state = 15)
+    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, random_state = 15) # random.state?
     return X_train, X_val, X_test, y_train, y_val, y_test
 
 def train_val_model(df_name, **features):
@@ -100,8 +113,22 @@ def train_val_model(df_name, **features):
     X_train, X_val, X_test, y_train, y_val, y_test = get_matrices(df_name)
     print("Y TRAIN:")
     print(collections.Counter(y_train))
-    clf = DecisionTreeClassifier(criterion = features['criterion'], max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], min_samples_leaf = features['min_samples_leaf'], max_leaf_nodes = features['max_leaf_nodes'], min_impurity_decrease = features['min_impurity_decrease'], class_weight = {0:features['class_weight'], 1:(1-features['class_weight'])})
-    #clf = DecisionTreeClassifier(criterion = features['criterion'], max_depth = features['max_depth'])
+ 
+    if features['class_weight'] is not None:
+       if(features['criterion'] <= 0.5):
+          #clf = DecisionTreeClassifier(criterion = 'gini', max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], min_samples_leaf = features['min_samples_leaf'], max_leaf_nodes = features['max_leaf_nodes'], min_impurity_decrease = features['min_impurity_decrease'], class_weight = {0:features['class_weight'], 1:(1-features['class_weight'])})
+          clf = DecisionTreeClassifier(criterion = 'gini', max_depth = features['max_depth'])
+       else:
+          #clf = DecisionTreeClassifier(criterion = 'entropy', max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], min_samples_leaf = features['min_samples_leaf'], max_leaf_nodes = features['max_leaf_nodes'], min_impurity_decrease = features['min_impurity_decrease'], class_weight = {0:features['class_weight'], 1:(1-features['class_weight'])})
+          clf = DecisionTreeClassifier(criterion = 'entropy', max_depth = features['max_depth'])
+    else:
+       if features['criterion'] <= 0.5:
+          #clf = DecisionTreeClassifier(criterion = 'gini', max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], min_samples_leaf = features['min_samples_leaf'], max_leaf_nodes = features['max_leaf_nodes'], min_impurity_decrease = features['min_impurity_decrease'], class_weight = features['class_weight'])
+          clf = DecisionTreeClassifier(criterion = 'gini', max_depth = features['max_depth'])
+       else:
+          #clf = DecisionTreeClassifier(criterion = 'entropy', max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], min_samples_leaf = features['min_samples_leaf'], max_leaf_nodes = features['max_leaf_nodes'], min_impurity_decrease = features['min_impurity_decrease'], class_weight = features['class_weight'])
+          clf = DecisionTreeClassifier(criterion = 'entropy', max_depth = features['max_depth'])
+
     y_pred = clf.fit(X_train, y_train).predict(X_val)
     print("Y PRED:")
     print(collections.Counter(y_pred))

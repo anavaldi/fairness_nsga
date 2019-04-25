@@ -1,5 +1,6 @@
 from nsga2.population import Population
 import random
+from nsga2.ml import *
 
 class NSGA2Utils:
 
@@ -17,10 +18,19 @@ class NSGA2Utils:
 
     def create_initial_population(self):
         population = Population()
-        for _ in range(self.num_of_individuals):
-            individual = self.problem.generate_individual()
-            self.problem.calculate_objectives(individual)
-            population.append(individual)
+        for k in range(self.num_of_individuals):
+            if k == 0:
+                individual = self.problem.generate_default_individual_gini()
+                self.problem.calculate_objectives(individual)
+                population.append(individual)
+            elif k == 1:
+                  individual = self.problem.generate_default_individual_entropy()
+                  self.problem.calculate_objectives(individual)
+                  population.append(individual)
+            else:
+                individual = self.problem.generate_individual()
+                self.problem.calculate_objectives(individual)
+                population.append(individual)
         return population
 
     def fast_nondominated_sort(self, population):
@@ -85,10 +95,12 @@ class NSGA2Utils:
                 self.__mutate(child1, self.mutation_prob)
             if(prob_mutation_child2 < self.mutation_prob):
                 self.__mutate(child2, self.mutation_prob)
+            child1.features = decode(self.problem.variables_range, **child1.features)
+            child2.features = decode(self.problem.variables_range, **child2.features)
             self.problem.calculate_objectives(child1)
             self.problem.calculate_objectives(child2)
             children.append(child1)
-            children.append(child2) 
+            children.append(child2)
         return children
 
     def __crossover(self, individual1, individual2):
@@ -100,10 +112,31 @@ class NSGA2Utils:
                 beta = self.__get_beta_uniform()
             else:
                 beta = self.__get_beta()
-            x1 = (individual1.features[hyperparameter] + individual2.features[hyperparameter])/2
-            x2 = abs((individual1.features[hyperparameter] - individual2.features[hyperparameter])/2)
-            child1.features[hyperparameter] = max(min(self.problem.variables_range[hyperparameter_index][1], x1 + beta*x2), self.problem.variables_range[hyperparameter_index][0]) 
-            child2.features[hyperparameter] = max(min(self.problem.variables_range[hyperparameter_index][1], x1 - beta*x2), self.problem.variables_range[hyperparameter_index][0])
+            if individual1.features[hyperparameter] is None and individual2.features[hyperparameter] is None:
+               child1.features[hyperparameter] = individual1.features[hyperparameter]
+               child2.features[hyperparameter] = individual2.features[hyperparameter]
+            elif individual1.features[hyperparameter] is None or individual2.features[hyperparameter] is None:
+                u = random.random()
+                if u <= 0.5:
+                    child1.features[hyperparameter] = individual1.features[hyperparameter]
+                    child2.features[hyperparameter] = individual2.features[hyperparameter]
+                else:
+                    child1.features[hyperparameter] = individual2.features[hyperparameter]
+                    child2.features[hyperparameter] = individual1.features[hyperparameter]
+            else:
+                x1 = (individual1.features[hyperparameter] + individual2.features[hyperparameter])/2
+                x2 = abs((individual1.features[hyperparameter] - individual2.features[hyperparameter])/2)
+                child1.features[hyperparameter] = x1 + beta*x2
+                child2.features[hyperparameter] = x1 - beta*x2
+                if child1.features[hyperparameter] < self.problem.variables_range[hyperparameter_index][0]:
+                   child1.features[hyperparameter] = self.problem.variables_range[hyperparameter_index][0]
+                elif child1.features[hyperparameter] > self.problem.variables_range[hyperparameter_index][1]:
+                   child1.features[hyperparameter] = self.problem.variables_range[hyperparameter_index][1]
+                if child2.features[hyperparameter] < self.problem.variables_range[hyperparameter_index][0]:
+                   child2.features[hyperparameter] = self.problem.variables_range[hyperparameter_index][0]
+                elif child2.features[hyperparameter] > self.problem.variables_range[hyperparameter_index][1]:
+                   child2.features[hyperparameter] = self.problem.variables_range[hyperparameter_index][1]
+
         return child1, child2
 
     def __get_beta(self):
@@ -120,14 +153,15 @@ class NSGA2Utils:
         hyperparameter = random.choice(list(child.features))
         hyperparameter_index = list(child.features.keys()).index(hyperparameter)
         u, delta = self.__get_delta()
-        if u < 0.5:
-            child.features[hyperparameter] += delta*(child.features[hyperparameter] - self.problem.variables_range[hyperparameter_index][0])
-        else:
-            child.features[hyperparameter] += delta*(self.problem.variables_range[hyperparameter_index][1] - child.features[hyperparameter])
-        if child.features[hyperparameter] < self.problem.variables_range[hyperparameter_index][0]:
-            child.features[hyperparameter] = self.problem.variables_range[hyperparameter_index][0]
-        elif child.features[hyperparameter] > self.problem.variables_range[hyperparameter_index][1]:
-            child.features[hyperparameter] = self.problem.variables_range[hyperparameter_index][1]
+        if child.features[hyperparameter] is not None:
+            if u < 0.5:
+                child.features[hyperparameter] += delta*(child.features[hyperparameter] - self.problem.variables_range[hyperparameter_index][0])
+            else:
+                child.features[hyperparameter] += delta*(self.problem.variables_range[hyperparameter_index][1] - child.features[hyperparameter])
+            if child.features[hyperparameter] < self.problem.variables_range[hyperparameter_index][0]:
+                child.features[hyperparameter] = self.problem.variables_range[hyperparameter_index][0]
+            elif child.features[hyperparameter] > self.problem.variables_range[hyperparameter_index][1]:
+                child.features[hyperparameter] = self.problem.variables_range[hyperparameter_index][1]
 
     def __get_delta(self):
         u = random.random()

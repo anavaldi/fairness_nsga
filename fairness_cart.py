@@ -15,10 +15,9 @@ class_names = iris.target_names
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state = 15)
 
-classifier = DecisionTreeClassifier(random_state = 15).fit(X_train, y_train)
+classifier = DecisionTreeClassifier(random_state = 15, criterion = 'gini', max_depth = None, min_samples_split = 2).fit(X_train, y_train)
 y_pred = classifier.fit(X_train, y_train).predict(X_test)
 
-cm = confusion_matrix(y_test, y_pred)
-tn, fp, fn, tp = confusion_matrix([0, 1, 0, 1], [1, 1, 1, 0]).ravel() 
+cm = confusion_matrix(y_test, y_pred)[0,0]
 
-print(fn/(tp+fn))
+print(cm)
