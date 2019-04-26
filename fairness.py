@@ -7,8 +7,8 @@ from math import ceil
 
 
 # problem parameters
-generations = 100
-individuals = 50
+generations = 10
+individuals = 10
 dataset = 'german'
 variable = 'age'
 
@@ -23,10 +23,12 @@ min_range_max_depth = 3
 max_range_max_depth = 15
 
 min_range_samples_split = 2
-max_range_samples_split = num_rows_train
+#max_range_samples_split = num_rows_train
+max_range_samples_split = 40
 
 min_range_samples_leaf = 1e-7
-max_range_samples_leaf = ceil(0.5*num_rows_train)
+#max_range_samples_leaf = ceil(0.5*num_rows_train)
+max_range_samples_leaf = 7
 
 min_range_leaf_nodes = 2
 max_range_leaf_nodes = 1000
@@ -34,8 +36,8 @@ max_range_leaf_nodes = 1000
 min_range_impurity_decrease = 1e-7
 max_range_impurity_decrease = 1
 
-min_range_class_weight = 0
-max_range_class_weight = 1
+min_range_class_weight = 1
+max_range_class_weight = 9
 
 #individuals_results = pd.DataFrame()
 
