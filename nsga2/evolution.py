@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 class Evolution:
 
-    def __init__(self, problem, evolutions_df, dataset_name, protected_variable, num_of_generations=5, num_of_individuals=10, num_of_tour_particips=2, tournament_prob=0.9, crossover_param=2, mutation_param=5, mutation_prob=0.1, beta_method="uniform"):
+    def __init__(self, problem, evolutions_df, dataset_name, protected_variable,num_of_generations=5, num_of_individuals=10, num_of_tour_particips=2, tournament_prob=0.9, crossover_param=2, mutation_param=5, mutation_prob=0.3, beta_method="uniform"):
         self.utils = NSGA2Utils(problem, num_of_individuals, num_of_tour_particips, tournament_prob, crossover_param, mutation_param, mutation_prob, beta_method)
         self.population = None
         self.evolutions_df = evolutions_df
@@ -27,11 +27,16 @@ class Evolution:
         for i in range(self.num_of_generations):
             for indiv in self.population.population:
                 indiv_list = list(indiv.features.items())
-                criterion, max_depth, min_samples_split, min_samples_leaf, max_leaf_nodes, min_impurity_decrease, class_weight = [item[1] for item in indiv_list]
-                evolutions_aux = pd.DataFrame({'criterion': [criterion], 'max_depth': [max_depth], 'min_samples_split': [min_samples_split], 'min_samples_leaf': [min_samples_leaf], 'max_leaf_nodes': [max_leaf_nodes], 'min_impurity_decrease': [min_impurity_decrease], 'class_weight': [class_weight],  'error': indiv.objectives[0], 'dem_fp': indiv.objectives[1], 'generation': i})
+                criterion, max_depth, min_samples_split, max_leaf_nodes, class_weight = [item[1] for item in indiv_list]
+                evolutions_aux = pd.DataFrame({'criterion': [criterion], 'max_depth': [max_depth], 'min_samples_split': [min_samples_split], 'max_leaf_nodes': [max_leaf_nodes], 'class_weight': [class_weight],  'error': indiv.objectives[0], 'dem_fp': indiv.objectives[1], 'generation': i+1, 'rank': indiv.rank, 'actual_depth': indiv.actual_depth, 'actual_leaves': indiv.actual_leaves, 'id': indiv.id, 'creation_mode': indiv.creation_mode})
+                #criterion, max_depth, min_samples_leaf, min_impurity_decrease, class_weight = [item[1] for item in indiv_list]
+                #evolutions_aux = pd.DataFrame({'criterion': [criterion], 'max_depth': [max_depth], 'min_samples_leaf': [min_samples_leaf], 'min_impurity_decrease': [min_impurity_decrease], 'class_weight': [class_weight],  'error': indiv.objectives[0], 'dem_fp': indiv.objectives[1], 'generation': i, 'rank': indiv.rank, 'actual_depth': indiv.actual_depth, 'actual_leaves': indiv.actual_leaves, 'creation_mode': indiv.creation_mode, 'id': indiv.id})
+                #print("rank:")
+                #print(indiv.rank)
                 self.evolutions_df = pd.concat([self.evolutions_df, evolutions_aux])
             if i == (self.num_of_generations-1):
-                self.evolutions_df.to_csv("./results/population/evolution_" + self.dataset_name + "_" + self.protected_variable + "_" + str(self.num_of_generations) + "_" + str(self.num_of_individuals) +  ".csv", index = False, header = True, columns = ['error', 'dem_fp', 'generation', 'criterion', 'max_depth', 'min_samples_split', 'min_samples_leaf', 'max_leaf_nodes', 'min_impurity_decrease', 'class_weight'])
+                self.evolutions_df.to_csv("./results/population/evolution_" + self.dataset_name + "_" + self.protected_variable + '_seed_' + str(self.utils.problem.seed) + "_gen_" + str(self.num_of_generations) + "_indiv_" + str(self.num_of_individuals) +  ".csv", index = False, header = True, columns = ['id', 'generation', 'rank', 'creation_mode', 'error', 'dem_fp', 'criterion', 'max_depth', 'min_samples_split', 'max_leaf_nodes', 'class_weight', 'actual_depth', 'actual_leaves'])
+                #self.evolutions_df.to_csv("./results/population/evolution_" + self.dataset_name + "_" + self.protected_variable + "_" + str(self.num_of_generations) + "_" + str(self.num_of_individuals) +  ".csv", index = False, header = True, columns = ['id', 'generation', 'creation_mode', 'error', 'dem_fp', 'generation', 'rank', 'criterion', 'max_depth', 'min_samples_leaf', 'min_impurity_decrease', 'class_weight', 'actual_depth', 'actual_leaves'])
             print("GENERATION:")
             print(i)
             self.population.extend(children)
@@ -42,8 +47,10 @@ class Evolution:
                 self.utils.calculate_crowding_distance(self.population.fronts[front_num])
                 new_population.extend(self.population.fronts[front_num])
                 front_num += 1
+                #if i == (self.num_of_generations-1):
+                #    self.evolutions_df.to_csv("./results/population/evolution_" + self.dataset_name + "_" + self.protected_variable + "_" + str(self.num_of_generations) + "_" + str(self.nu,_of_individuals) + ".csv", index = False, header = True, columns = ['error', 'dem_fp', 'generation', 'front_num', 'criterion', 'max_depth', 'min_samples_split', 'min_samples_leaf', 'max_leaf_nodes', 'min_impurity_decrease', 'class_weight'])
             self.utils.calculate_crowding_distance(self.population.fronts[front_num])
-            [print(ind.features) for ind in new_population.population]
+            #[print(ind.features) for ind in new_population.population]
             self.population.fronts[front_num].sort(key=lambda individual: individual.crowding_distance, reverse=True)
             new_population.extend(self.population.fronts[front_num][0:self.num_of_individuals-len(new_population)])
             returned_population = self.population
