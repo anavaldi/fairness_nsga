@@ -11,9 +11,11 @@ We conclude experimentally that our method can optimize deci-sion tree models to
 
 ## Experimentation
 
-We conduct an extensive set of experiments based on 5 real-world datasets, which are widely used in the fairness literature.The solution space obtained by our approach indicates that thereexists a wide number of optimal solutions (Pareto optimal), thatare characterized by not being dominated by each other. We alsoevaluate the boundaries between accuracy and fairness that canbe achieved on each problem, giving an empirical visualizationof the limits between both measures. In addition, we assess howdecision trees hyperparameters are affected by this tradeoff. Finally,a convergence analysis is also presented in order to evaluate theevolutionary approach of this methodolog
+We conduct an extensive set of experiments based on 5 real-world datasets, which are widely used in the fairness literature.The solution space obtained by our approach indicates that thereexists a wide number of optimal solutions (Pareto optimal), thatare characterized by not being dominated by each other. We alsoevaluate the boundaries between accuracy and fairness that canbe achieved on each problem, giving an empirical visualizationof the limits between both measures. In addition, we assess howdecision trees hyperparameters are affected by this tradeoff. Finally,a convergence analysis is also presented in order to evaluate theevolutionary approach of this methodology.
 
-* ZDT1 ![ZDT1](pictures/ZDT1.png)
-* ZDT4 ![ZDT4](pictures/ZDT4.png)
-* VIENNET ![VIENNET](pictures/VIENNET.png)
+* Adult ![pareto_frontier_adult](pictures/pareto_frontier_adult.png)
+* German ![pareto_frontier_german](pictures/pareto_frontier_german.png)
+* Propublica ![pareto_frontier_propublica](pictures/pareto_frontier_propublica.png)
+* Propublica violent ![pareto_frontier_propublica_violent](pictures/pareto_frontier_propublica_violent.png)
+* Ricci ![pareto_frontier_propublica_ricci](pictures/pareto_frontier_ricci.png)
 
