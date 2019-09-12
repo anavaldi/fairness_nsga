@@ -1,61 +1,19 @@
-# NSGA-II Python
-Implementation of NSGA-II algorithm in form of a python library.
+# How fair can we go? Assessing the boundaries of fairness in decision trees
 
-This implementation can be used to solve multivariate (more than one dimensions) multi-objective optimization problem. The number of objectives and dimensions are not limited. Some critical operators are chosen as: Binary Tournament Selection, Simulated Binary Crossover and Polynomial Mutation. Note that we didn't start everything from scratch but modified the source code from [wreszelewski/nsga2](https://github.com/wreszelewski/nsga2). We are very thankful to Wojciech Reszelewski and Kamil Mielnik - authors of this original version. The following items are modified:
-* Fix the crowding distance formula.
-* Modify some parts of the code to apply to any number of objectives and dimensions.
-* Modify the selection operator to Tournament Selection.
-* Change the crossover operator to Simulated Binary Crossover.
-* Change the mutation operator to Polynomial Mutation.
+## Abstract
 
-## Usage
-1. Class **Problem**
+Fair machine learning works have been focusing on the develop-ment of equitable algorithms that address discrimination of certaingroups. Yet, many of these fairness-aware approaches aim to obtaina unique solution to the problem, which leads to a poor understand-ing of the statistical limits of bias mitigation interventions.
 
-    Defined in _problem.py_.
+We present the first methodology that allows to explore thoselimits within a multi-objective framework that seeks to optimizeany measure of accuracy and fairness and provides a Pareto frontwith the best feasible solutions. In this work, we focus our study ondecision tree classifiers since they are widely accepted in machinelearning, are easy to interpret and can deal with non-numericalinformation naturally.
 
-    Using to define a multi-objective problem.
+We conclude experimentally that our method can optimize deci-sion tree models to be fair without compromising accuracy, whichcontrasts with some preliminary works in the field. However, byguiding global optimization by the non-discriminatory objective,the learning algorithm tends to produce more complex models. Webelieve that our contribution will help stakeholders of sociotechni-cal systems to assess how far they can go by being fair, accurateand explainable.
 
-    Arguments:
-    * `objectives`: A list of functions, representing the objective functions.
-    * `num_of_variables`: An integer, representing the number of variables.
-    * `variables_range`: A list of tuples of two elements, representing the lower and upper bound of each respective variables.
-    * `same_range`: A boolean argument, default = `False`. If true, the range of all variables are the same (this case `variables_range` has only one element), otherwise each variable has its own range.
-    * `expand`: A boolean argument, default = `True`. If true, input of functions are treated as list of respective variables (e.x. `f(x,y,z)`), otherwise they are treated as a vector (e.x. `f([x1, x2, x3])`).
 
-2. Class **Evolution**
+## Experimentation
 
-    Defined in _evolution.py_.
+We conduct an extensive set of experiments based on 5 real-world datasets, which are widely used in the fairness literature.The solution space obtained by our approach indicates that thereexists a wide number of optimal solutions (Pareto optimal), thatare characterized by not being dominated by each other. We alsoevaluate the boundaries between accuracy and fairness that canbe achieved on each problem, giving an empirical visualizationof the limits between both measures. In addition, we assess howdecision trees hyperparameters are affected by this tradeoff. Finally,a convergence analysis is also presented in order to evaluate theevolutionary approach of this methodolog
 
-    Using to run NSGA-II.
-
-    1. Arguments:
-        * `problem`: An object of class Problem.
-        * `num_of_generations`: An integer, default = 1000, representing the number of generations.
-        * `num_of_individuals`: An integer, default = 100, representing the number of individuals, a.k.a the population size.    
-        * `num_of_tour_particips`: An integer, default = 2, representing the number of participants in tournament selection operator.
-        * `tournament_prob`: A real number, default = 0.9, representing the probability used in tournament selection.
-        * `crossover_param`: An integer, default = 2, representing the parameter used in simulated binary crossover.
-        * `mutation_param`: An integer, default = 2, representing the paramenter used in polynomial mutation.
-    2. Methods:
-        * `evolve`:
-            * Arguments: None.
-            * Return: List of the best individuals in the last generation.
-
-## Example
-Examples about SCH problem and KUR problem are showed in _sch.py_ and _kur.py_.
-
-In addition, the results of some popular multi-objective problems is demonstrated as belows:
-
-* SCH ![SCH](pictures/SCH.png)
-* KUR ![KUR](pictures/KUR.png)
 * ZDT1 ![ZDT1](pictures/ZDT1.png)
 * ZDT4 ![ZDT4](pictures/ZDT4.png)
 * VIENNET ![VIENNET](pictures/VIENNET.png)
 
-## Authors
-* Pham Ngo Gia Bao, Ho Chi Minh University of Technology
-* Tram Loi Quan, Ho Chi Minh University of Technology
-* A/Prof. Quan Thanh Tho, Ho Chi Minh University of Technology (advisor)
-* A/Prof. Akhil Garg, Shantou University (advisor)
-
-We are very thankful to A/Prof. Tho and A/Prof. Akhil for helping and guiding us to finish this work.
