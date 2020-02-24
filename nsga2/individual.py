@@ -24,3 +24,7 @@ class Individual(object):
             and_condition = and_condition and first <= second
             or_condition = or_condition or first < second
         return (and_condition and or_condition)
+
+# Cambiar funcion dominates
+# Programar plot 3D
+# Guardar modelo clf en memoria

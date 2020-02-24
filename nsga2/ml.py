@@ -13,6 +13,8 @@ from sklearn.tree import export_graphviz
 import pydotplus
 from imblearn.metrics import geometric_mean_score
 
+import pickle
+
 with open('nsga2/config_file.yaml', 'r') as f:
     config = yaml.load(f)
 
@@ -42,9 +44,9 @@ def decode(var_range, **features):
         features['max_leaf_nodes'] = int(round(features['max_leaf_nodes']))
     else:
         features['max_leaf_nodes'] = var_range[3][1]
- 
+
     #features['min_impurity_decrease'] = round(features['min_impurity_decrease'], 4)
- 
+
     if features['class_weight'] is not None:
        features['class_weight'] = int(round(features['class_weight']))
     #else:
@@ -75,7 +77,7 @@ def get_matrices(df_name, seed):
     y = df.iloc[:, -1]
 
     if(df_name == 'propublica_violent_recidivism'):
-        X = X[['sex', 'age', 'age_cat', 'race', 'juv_fel_count', 'juv_misd_count', 'juv_other_count', 'priors_count', 'c_charge_degree', 'c_charge_desc']]
+        X = X[['sex', 'age', 'age_cat', 'race', 'juv_fel_count', 'juv_misd_count', 'juv_other_count', 'priors_count', 'c_charge_degree', 'c_charge_desc', 'decile_score', 'score_text']]
     if(df_name == 'propublica_recidivism'):
         X = X[['sex', 'age', 'age_cat', 'race', 'juv_fel_count', 'juv_misd_count', 'juv_other_count', 'priors_count', 'c_charge_degree', 'c_charge_desc', 'decile_score', 'score_text']]
 
@@ -87,7 +89,7 @@ def get_matrices(df_name, seed):
                 X[column_name] = np.where(X[column_name] == 'White', 0, 1)
             elif(column_name == 'sex'):
                 X[column_name] = np.where(X[column_name] == 'Male', 0, 1)
-            elif(column_name == 'race' and (df_name == 'propublica_recidivism' or df_name == 'propublica_violent_recidivism')): 
+            elif(column_name == 'race' and (df_name == 'propublica_recidivism' or df_name == 'propublica_violent_recidivism')):
                 X[column_name] = np.where(X[column_name] == 'Caucasian', 0, 1)
             elif(column_name == 'compas_screening_date' or column_name == 'screening_date' or column_name == 'dob'):
                 X[column_name] = pd.to_datetime(X[column_name])
@@ -104,7 +106,8 @@ def get_matrices(df_name, seed):
         else:
             pass
 
-
+    # POSITIVE = 1
+    # REVISAR CONFUSION.MATRIX
     if(df_name == 'adult'):
         y = np.where(y == '>50K', 0, 1)
     elif(df_name == 'german'):
@@ -117,6 +120,7 @@ def get_matrices(df_name, seed):
         X[c] = X[c].fillna(0)
         X = X.fillna("")
         y = np.where(y == 0, 0, 1)
+        #y = np.where(y == 0, 1, 0)
         #print(X.head())
     elif(df_name == 'ricci'):
         y =  np.where(y >=  70.000, 0, 1)
@@ -161,7 +165,7 @@ def train_model(df_name, seed, **features):
     #print(collections.Counter(y_train))
     #print("Y VAL:")
     #print(collections.Counter(y_val))
- 
+
     if features['class_weight'] is not None:
        if(features['criterion'] <= 0.5):
           clf = DecisionTreeClassifier(criterion = 'gini', max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], max_leaf_nodes = features['max_leaf_nodes'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])})
@@ -180,6 +184,13 @@ def train_model(df_name, seed, **features):
     learner = clf.fit(X_train, y_train)
     #print_tree(learner, X_train.columns)
     return learner
+
+def save_model(learner, dataset_name, seed, variable_name, num_of_generations, num_of_individuals, individual_id):
+    # save the model to disk
+    path = './results/models/' + dataset_name + '/'
+    filename = 'model_' + dataset_name + '_seed_' + str(seed) + '_gen_' + variable_name + '_indiv_' + str(num_of_generations) + '_' + str(num_of_individuals) + '_id_' + individual_id + '.sav'
+    pickle.dump(learner, open(path + filename, 'wb'))
+    return
 
 
 def val_model(df_name, learner, seed):
@@ -203,6 +214,13 @@ def val_model(df_name, learner, seed):
     return X_val, y_val, y_pred
 
 
+def test_model(df_name, learner, seed):
+    test = pd.read_csv('./data/train_val_test/' + df_name + '_test_seed_' + str(seed) + '.csv')
+    X_test = test.iloc[:, :-1]
+    y_test = test.iloc[:, -1]
+    y_pred = learner.predict(X_test)
+    return X_test, y_test, y_pred
+
 def split_protected(X, y, pred, protected_variable, protected_value = 1):
     """
     Split datasets into (white, black), (male, female), etc.
@@ -219,7 +237,6 @@ def split_protected(X, y, pred, protected_variable, protected_value = 1):
 
 def evaluate_fairness(X_val, y_val, y_pred, protected_variable):
     y_val_p, y_val_u, y_pred_p, y_pred_u = split_protected(X_val, y_val, y_pred, protected_variable, 1)
-
     return y_val_p, y_val_u, y_pred_p, y_pred_u
 
 def accuracy_inv(y_val, y_pred):
@@ -270,4 +287,7 @@ def dem_tnr(y_val_p, y_val_u, y_pred_p, y_pred_u):
     dem = abs(tnr_p - tnr_u)
     return dem
 
-
+def complexity(learner):
+    complex = learner.get_n_leaves()
+    #complex = learner.get_depth()
+    return complex

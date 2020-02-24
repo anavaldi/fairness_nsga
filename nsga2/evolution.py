@@ -28,14 +28,21 @@ class Evolution:
             for indiv in self.population.population:
                 indiv_list = list(indiv.features.items())
                 criterion, max_depth, min_samples_split, max_leaf_nodes, class_weight = [item[1] for item in indiv_list]
+                # problem with 2 obj.func.:
                 evolutions_aux = pd.DataFrame({'criterion': [criterion], 'max_depth': [max_depth], 'min_samples_split': [min_samples_split], 'max_leaf_nodes': [max_leaf_nodes], 'class_weight': [class_weight],  'error': indiv.objectives[0], 'dem_fp': indiv.objectives[1], 'generation': i+1, 'rank': indiv.rank, 'actual_depth': indiv.actual_depth, 'actual_leaves': indiv.actual_leaves, 'id': indiv.id, 'creation_mode': indiv.creation_mode})
+                # problem with 3 obj.func.:
+                #evolutions_aux = pd.DataFrame({'criterion': [criterion], 'max_depth': [max_depth], 'min_samples_split': [min_samples_split], 'max_leaf_nodes': [max_leaf_nodes], 'class_weight': [class_weight],  'error': indiv.objectives[0], 'dem_fp': indiv.objectives[1], 'complexity': indiv.objectives[2], 'generation': i+1, 'rank': indiv.rank, 'actual_depth': indiv.actual_depth, 'actual_leaves': indiv.actual_leaves, 'id': indiv.id, 'creation_mode': indiv.creation_mode})
+
                 #criterion, max_depth, min_samples_leaf, min_impurity_decrease, class_weight = [item[1] for item in indiv_list]
                 #evolutions_aux = pd.DataFrame({'criterion': [criterion], 'max_depth': [max_depth], 'min_samples_leaf': [min_samples_leaf], 'min_impurity_decrease': [min_impurity_decrease], 'class_weight': [class_weight],  'error': indiv.objectives[0], 'dem_fp': indiv.objectives[1], 'generation': i, 'rank': indiv.rank, 'actual_depth': indiv.actual_depth, 'actual_leaves': indiv.actual_leaves, 'creation_mode': indiv.creation_mode, 'id': indiv.id})
                 #print("rank:")
                 #print(indiv.rank)
                 self.evolutions_df = pd.concat([self.evolutions_df, evolutions_aux])
             if i == (self.num_of_generations-1):
+                # problem with 2 obj.func.:
                 self.evolutions_df.to_csv("./results/population/evolution_" + self.dataset_name + "_" + self.protected_variable + '_seed_' + str(self.utils.problem.seed) + "_gen_" + str(self.num_of_generations) + "_indiv_" + str(self.num_of_individuals) +  ".csv", index = False, header = True, columns = ['id', 'generation', 'rank', 'creation_mode', 'error', 'dem_fp', 'criterion', 'max_depth', 'min_samples_split', 'max_leaf_nodes', 'class_weight', 'actual_depth', 'actual_leaves'])
+                # problem with 3 obj.func.:
+                #self.evolutions_df.to_csv("./results/population/evolution_" + self.dataset_name + "_" + self.protected_variable + '_seed_' + str(self.utils.problem.seed) + "_gen_" + str(self.num_of_generations) + "_indiv_" + str(self.num_of_individuals) +  ".csv", index = False, header = True, columns = ['id', 'generation', 'rank', 'creation_mode', 'error', 'dem_fp', 'complexity', 'criterion', 'max_depth', 'min_samples_split', 'max_leaf_nodes', 'class_weight', 'actual_depth', 'actual_leaves'])
                 #self.evolutions_df.to_csv("./results/population/evolution_" + self.dataset_name + "_" + self.protected_variable + "_" + str(self.num_of_generations) + "_" + str(self.num_of_individuals) +  ".csv", index = False, header = True, columns = ['id', 'generation', 'creation_mode', 'error', 'dem_fp', 'generation', 'rank', 'criterion', 'max_depth', 'min_samples_leaf', 'min_impurity_decrease', 'class_weight', 'actual_depth', 'actual_leaves'])
             print("GENERATION:")
             print(i)
