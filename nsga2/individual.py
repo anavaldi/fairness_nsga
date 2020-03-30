@@ -17,7 +17,7 @@ class Individual(object):
             return self.features == other.features
         return False
 
-    def dominates(self, other_individual):
+    def dominates_standard(self, other_individual):
         and_condition = True
         or_condition = False
         for first, second in zip(self.objectives, other_individual.objectives):
@@ -25,6 +25,20 @@ class Individual(object):
             or_condition = or_condition or first < second
         return (and_condition and or_condition)
 
-# Cambiar funcion dominates
-# Programar plot 3D
-# Guardar modelo clf en memoria
+    def dominates(self, other_individual):
+        and_condition = True
+        or_condition = False
+        eq_condition = True
+        for first, second in zip(self.objectives, other_individual.objectives):
+            and_condition = and_condition and first <= second
+            or_condition = or_condition or first < second
+            eq_condition = eq_condition and first == second
+            
+        if (eq_condition):
+            if ((self.features['max_leaf_nodes'] is None) or (other_individual.features['max_leaf_nodes'] is None)):
+                return (self.actual_leaves < other_individual.actual_leaves)
+            else:
+                return ((self.actual_leaves < other_individual.actual_leaves) or
+                       ((self.actual_leaves == other_individual.actual_leaves) and (self.features['max_leaf_nodes'] < other_individual.features['max_leaf_nodes'])))
+        else:
+            return (and_condition and or_condition)

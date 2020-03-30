@@ -18,16 +18,10 @@ import pickle
 with open('nsga2/config_file.yaml', 'r') as f:
     config = yaml.load(f)
 
-
 def decode(var_range, **features):
     """
     Decoding hyperaparameters.
     """
-
-    #if(features['criterion'] <= 0.5):
-    #   features['criterion'] = "gini"
-    #else:
-    #   features['criterion'] = "entropy"
 
     features['criterion'] = round(features['criterion'], 0)
 
@@ -45,15 +39,10 @@ def decode(var_range, **features):
     else:
         features['max_leaf_nodes'] = var_range[3][1]
 
-    #features['min_impurity_decrease'] = round(features['min_impurity_decrease'], 4)
-
     if features['class_weight'] is not None:
        features['class_weight'] = int(round(features['class_weight']))
-    #else:
-        #features['class_weight'] = var_range[4][1]
 
     hyperparameters = ['criterion', 'max_depth', 'min_samples_split', 'max_leaf_nodes', 'class_weight']
-    #hyperparameters = ['criterion', 'max_depth', 'min_samples_leaf', 'min_impurity_decrease', 'class_weight']
     list_of_hyperparameters = [(hyperparameter, features[hyperparameter]) for hyperparameter in hyperparameters]
     features = collections.OrderedDict(list_of_hyperparameters)
     return features
@@ -66,13 +55,21 @@ def read_data(df_name):
     df = pd.read_csv(config['ROOT_PATH'] + '/data/' + df_name + '.csv', sep = ',')
     return df
 
+def score_text(v):
+    if v == 'Low':
+        return 0
+    elif v == 'Medium':
+        return 1
+    else:
+        return 2
+
 def get_matrices(df_name, seed):
     """
     Split dataframe into train and test.
     """
 
     df = read_data(df_name)
-    #print(df.head())
+
     X = df.iloc[:, :-1]
     y = df.iloc[:, -1]
 
@@ -99,6 +96,8 @@ def get_matrices(df_name, seed):
                 X.drop(column_name, inplace = True, axis = 1)
             elif(column_name == 'Race'):
                 X[column_name] = np.where(X[column_name] == 'W', 0, 1)
+            elif(column_name == 'score_text'):
+                X[column_name] = X[column_name].map(score_text)
             else:
                 X[column_name] = le.fit_transform(X[column_name])
         elif(column_name == 'age' and df_name == 'german'):
@@ -107,21 +106,15 @@ def get_matrices(df_name, seed):
             pass
 
     # POSITIVE = 1
-    # REVISAR CONFUSION.MATRIX
     if(df_name == 'adult'):
-        y = np.where(y == '>50K', 0, 1)
+        y = np.where(y == '>50K', 1, 0)
     elif(df_name == 'german'):
         y = np.where(y == 1, 0, 1)
     elif(df_name == 'propublica_recidivism' or df_name == 'propublica_violent_recidivism'):
-        #print(type(X))
-        #X = X.apply(pd.to_numeric, errors = 'coerce')
-        #X = X.fillna('ffill', inplace = True)
         c = X.select_dtypes(np.number).columns
         X[c] = X[c].fillna(0)
         X = X.fillna("")
         y = np.where(y == 0, 0, 1)
-        #y = np.where(y == 0, 1, 0)
-        #print(X.head())
     elif(df_name == 'ricci'):
         y =  np.where(y >=  70.000, 0, 1)
 
@@ -155,34 +148,22 @@ def train_model(df_name, seed, **features):
     """
     Train classifier.
     """
-    #print(features)
-    #X_train = get_matrices(df_name, seed)[0]
-    #y_train = get_matrices(df_name, seed)[3]
     train = pd.read_csv('./data/train_val_test/' + df_name + '_train_seed_' + str(seed) + '.csv')
     X_train = train.iloc[:, :-1]
     y_train = train.iloc[:, -1]
-    #print("Y TRAIN:")
-    #print(collections.Counter(y_train))
-    #print("Y VAL:")
-    #print(collections.Counter(y_val))
-
+    
     if features['class_weight'] is not None:
        if(features['criterion'] <= 0.5):
-          clf = DecisionTreeClassifier(criterion = 'gini', max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], max_leaf_nodes = features['max_leaf_nodes'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])})
-          #clf = DecisionTreeClassifier(criterion = 'gini', max_depth = features['max_depth'], min_samples_leaf = features['min_samples_leaf'], min_impurity_decrease = features['min_impurity_decrease'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])})
+          clf = DecisionTreeClassifier(criterion = 'gini', max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], max_leaf_nodes = features['max_leaf_nodes'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])}, presort = True)
        else:
-          clf = DecisionTreeClassifier(criterion = 'entropy', max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], max_leaf_nodes = features['max_leaf_nodes'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])})
-          #clf = DecisionTreeClassifier(criterion = 'entropy', max_depth = features['max_depth'], min_samples_leaf = features['min_samples_leaf'], min_impurity_decrease = features['min_impurity_decrease'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])})
+          clf = DecisionTreeClassifier(criterion = 'entropy', max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], max_leaf_nodes = features['max_leaf_nodes'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])}, presort = True)
     else:
        if features['criterion'] <= 0.5:
-          clf = DecisionTreeClassifier(criterion = 'gini', max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], max_leaf_nodes = features['max_leaf_nodes'], class_weight = features['class_weight'])
-          #clf = DecisionTreeClassifier(criterion = 'gini', max_depth = features['max_depth'], min_samples_leaf = features['min_samples_leaf'], min_impurity_decrease = features['min_impurity_decrease'], class_weight = features['class_weight'])
+          clf = DecisionTreeClassifier(criterion = 'gini', max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], max_leaf_nodes = features['max_leaf_nodes'], class_weight = features['class_weight'], presort = True)
        else:
-          clf = DecisionTreeClassifier(criterion = 'entropy', max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], max_leaf_nodes = features['max_leaf_nodes'], class_weight = features['class_weight'])
-          #clf = DecisionTreeClassifier(criterion = 'entropy', max_depth = features['max_depth'], min_samples_leaf = features['min_samples_leaf'], min_impurity_decrease = features['min_impurity_decrease'], class_weight = features['class_weight'])
+          clf = DecisionTreeClassifier(criterion = 'entropy', max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], max_leaf_nodes = features['max_leaf_nodes'], class_weight = features['class_weight'], presort = True)
 
     learner = clf.fit(X_train, y_train)
-    #print_tree(learner, X_train.columns)
     return learner
 
 def save_model(learner, dataset_name, seed, variable_name, num_of_generations, num_of_individuals, individual_id):
@@ -192,27 +173,15 @@ def save_model(learner, dataset_name, seed, variable_name, num_of_generations, n
     pickle.dump(learner, open(path + filename, 'wb'))
     return
 
-
 def val_model(df_name, learner, seed):
     """
     Test classifier.
     """
-    #learner = train_model(df_name, **features)
-    #X_val = get_matrices(df_name, seed)[1]
-    #y_val = get_matrices(df_name, seed)[4]
     val = pd.read_csv('./data/train_val_test/' + df_name + '_val_seed_' + str(seed) + '.csv')
     X_val = val.iloc[:, :-1]
     y_val = val.iloc[:, -1]
-    #print("Y VAL:")
-    #print(collections.Counter(y_val))
     y_pred = learner.predict(X_val)
-    #print_tree(learner, X_train.columns)
-    #print("Y PRED:")
-    #print(collections.Counter(y_pred))
-    #print(X_train.head())
-    #print(X_val.head())
     return X_val, y_val, y_pred
-
 
 def test_model(df_name, learner, seed):
     test = pd.read_csv('./data/train_val_test/' + df_name + '_test_seed_' + str(seed) + '.csv')
@@ -232,7 +201,6 @@ def split_protected(X, y, pred, protected_variable, protected_value = 1):
     y_val_u = df_u['y_val']
     y_pred_p = df_p['y_pred']
     y_pred_u = df_u['y_pred']
-    #print(df_p.head())
     return y_val_p, y_val_u, y_pred_p, y_pred_u
 
 def evaluate_fairness(X_val, y_val, y_pred, protected_variable):
@@ -240,17 +208,11 @@ def evaluate_fairness(X_val, y_val, y_pred, protected_variable):
     return y_val_p, y_val_u, y_pred_p, y_pred_u
 
 def accuracy_inv(y_val, y_pred):
-    #err = 1 - accuracy_score(y_val, y_pred)
     err = 1 - f1_score(y_val, y_pred)
-    #print("ERROR:")
-    #print(err)
     return err
 
 def gmean_inv(y_val, y_pred):
     gmean_error = 1 - geometric_mean_score(y_val, y_pred)
-    #print("ERROR:")
-    #print(gmean_error)
-    #print(confusion_matrix(y_val, y_pred))
     return gmean_error
 
 def accuracy_diff(y_val_p, y_val_u, y_pred_p, y_pred_u):
@@ -262,21 +224,30 @@ def accuracy_diff(y_val_p, y_val_u, y_pred_p, y_pred_u):
     acc_fair = abs(acc_u - acc_p)
     return acc_fair
 
-def dem_fpr(y_val_p, y_val_u, y_pred_p, y_pred_u):
+def dem_tpr(y_val_p, y_val_u, y_pred_p, y_pred_u):
     """
     Compute demography metric.
     """
     tn_p, fp_p, fn_p, tp_p = confusion_matrix(y_val_p, y_pred_p).ravel()
     tn_u, fp_u, fn_u, tp_u = confusion_matrix(y_val_u, y_pred_u).ravel()
-    #print('nonprotected:')
-    #print(confusion_matrix(y_val_p, y_pred_p).ravel())
     tpr_p = tp_p/(tp_p + fn_p)
     tpr_u = tp_u/(tp_u + fn_u)
     dem = abs(tpr_p - tpr_u)
     if(tpr_p == 0 or tpr_u == 0):
         dem = 1
-    #print("DEMOGRAPH:")
-    #print(dem)
+    return dem
+
+def dem_fpr(y_val_p, y_val_u, y_pred_p, y_pred_u):
+    """
+    Compute false positive rate parity.
+    """
+    tn_p, fp_p, fn_p, tp_p = confusion_matrix(y_val_p, y_pred_p).ravel()
+    tn_u, fp_u, fn_u, tp_u = confusion_matrix(y_val_u, y_pred_u).ravel()
+    fpr_p = fp_p/(fp_p + tn_p)
+    fpr_u = fp_u/(fp_u + tn_u)
+    dem = abs(fpr_p - fpr_u)
+    if(fpr_p == 0 or fpr_u == 0):
+        dem = 1
     return dem
 
 def dem_tnr(y_val_p, y_val_u, y_pred_p, y_pred_u):
@@ -289,5 +260,4 @@ def dem_tnr(y_val_p, y_val_u, y_pred_p, y_pred_u):
 
 def complexity(learner):
     complex = learner.get_n_leaves()
-    #complex = learner.get_depth()
     return complex

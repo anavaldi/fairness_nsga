@@ -11,8 +11,6 @@ def rand_jitter(arr):
     return arr + np.random.randn(len(arr)) * stdev
 
 def scatterplot(df, seed, x_dim, y_dim, category, dataset, variable, generations, individuals):
-   #x = rand_jitter(df[x_dim])
-   #y = rand_jitter(df[y_dim])
    x = df[x_dim]
    y = df[y_dim]
 
