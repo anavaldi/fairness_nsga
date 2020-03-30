@@ -1,13 +1,12 @@
-# How fair can we go? Assessing the boundaries of fairness in decision trees
+# How fair can we go in machine learning? Assessing the boundaries of fairness in decision trees
 
 ## Abstract
 
-Fair machine learning works have been focusing on the develop-ment of equitable algorithms that address discrimination of certain groups. Yet, many of these fairness-aware approaches aim to obtaina unique solution to the problem, which leads to a poor understanding of the statistical limits of bias mitigation interventions.
+Fair machine learning works have been focusing on the development of equitable algorithms that address discrimination of certain groups. Yet, many of these fairness-aware approaches aim to obtain a unique solution to the problem, which leads to a poor understanding of the statistical limits of bias mitigation interventions.
 
-We present the first methodology that allows to explore thoselimits within a multi-objective framework that seeks to optimize any measure of accuracy and fairness and provides a Pareto front with the best feasible solutions. In this work, we focus our study ondecision tree classifiers since they are widely accepted in machine learning, are easy to interpret and can deal with non-numerical information naturally.
+We present the first methodology that allows to explore those limits within a multi-objective framework that seeks to optimize any measure of accuracy and fairness and provides a Pareto front with the best feasible solutions. In this work, we focus our study on decision tree classifiers since they are widely accepted in machine learning, are easy to interpret and can deal with non-numerical information naturally.
 
-We conclude experimentally that our method can optimize deci-sion tree models to be fair without compromising accuracy, which contrasts with some preliminary works in the field. However, by guiding global optimization by the non-discriminatory objective,the learning algorithm tends to produce more complex models. We believe that our contribution will help stakeholders of sociotechnical systems to assess how far they can go by being fair, accurateand explainable.
-
+We conclude experimentally that our method can optimize decision tree models by being fairer with a small cost of the classification error. We believe that our contribution will help stakeholders of sociotechnical systems to assess how far they can go being fair and accurate, thus serving in the support of enhanced decision making where machine learning is used.
 
 ## Experimentation
 
@@ -17,7 +16,5 @@ We conduct an extensive set of experiments based on 5 real-world datasets, which
 ![pareto_frontier_german](pictures/pareto_frontier_german.png)
 ![pareto_frontier_propublica](pictures/pareto_frontier_propublica.png)
 ![pareto_frontier_propublica_violent](pictures/pareto_frontier_propublica_violent.png)
-![pareto_frontier_propublica_ricci](pictures/pareto_frontier_ricci.png)
 
-**Fig. 1:** The Pareto front between accuracy and fairness on the different validation sets. Orange dots are Pareto optimal solutions obtained on each run of the meta-learning algorithm, whereas purple dots indicate the overall Pareto front solutions, i.e., *how fair can we go*. Our methodology is effective to find a wide spread of solutions which are accurate and fair at the same time. In the case of ProPublica, the meta-learning algorithm also finds better solutions than the obtained by the COMPAS algorithm, showing that a range set of possibilities of being more fair without worsening accuracy exists.
-
+**Figure:** Orange dots represent Pareto optimal solutions (minimizing error (1-G-mean) vs. unfairness (FPRdiff)) found by the proposed algorithm in different problems. Dark gray dots indicate the average Pareto set, which is a way of representing *how fair can we go* in a specific problem or, in other words, which shape takes the accuracy-fairness tradeoff. Light gray area is the interquartile range. Our methodology is effective to find a wide spread of solutions that are accurate and fair at the same time. In the two ProPublica datasets, the meta-learning algorithm also finds better solutions than the obtained by COMPAS (red dots), showing that there is a wide range of possibilities to be fairer without worsening accuracy
