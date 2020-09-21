@@ -1,0 +1,11 @@
+# Create virtual enviorment before running!
+sudo apt-get install python-virtualenv python3.5-dev
+virtualenv -p python3.5 ~/env35
+source ~/env35/bin/activate
+
+
+# write layout
+tmux capture-pane -pS -1000 > file.txt
+
+# execute  program 
+python3 name.py

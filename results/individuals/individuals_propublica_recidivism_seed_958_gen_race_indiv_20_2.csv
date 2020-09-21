@@ -1,0 +1,5 @@
+id,creation_mode,error,dem_fp,complexity,criterion,max_depth,min_samples_split,max_leaf_nodes,class_weight,actual_depth,actual_leaves
+3ZC4CHRAM8,inicialization,0.4086022012731434,0.1018258426966292,26,0.0,,2,,,26,1463
+ZLWHVH5IU4,inicialization,0.39115155904272214,0.004699654278305876,26,1.0,26,2,1463,,26,1463
+78PV64LA44,crossover,0.397895727015093,0.03197925669835777,26,1.0,26,2,1463,,26,1463
+RY5P2H68E4,mutation,0.4057362433750902,0.12186689714779597,26,0.0,26,2,1463,,26,1457

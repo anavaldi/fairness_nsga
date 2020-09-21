@@ -1,0 +1,7 @@
+datasets = ['adult', 'german', 'propublica_recidivism', 'propublica_violent_recidivism', 'ricci'] 
+variable = ['race', 'age', 'race', 'race', 'Race']
+adults_seeds = [58, 300, 326, 474, 509, 551, 616, 707, 765, 832]
+german_seeds = [132, 197, 278, 345, 517, 537, 542, 604, 620, 860]
+propublica_recidivism_seeds = [15, 149, 263, 317, 382, 522, 653, 840, 923, 958]
+propublica_violent_recidivism_seeds = [24, 71, 366, 436, 440, 738, 838, 893, 894, 941]
+ricci_seeds = [205, 216, 263, 274, 315, 374, 601, 607, 902, 945]
