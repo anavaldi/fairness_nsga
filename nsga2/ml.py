@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn import preprocessing
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import confusion_matrix, accuracy_score, f1_score
 import yaml
@@ -18,9 +19,9 @@ import pickle
 with open('nsga2/config_file.yaml', 'r') as f:
     config = yaml.load(f)
 
-def decode(var_range, **features):
+def decode_dt(var_range, **features):
     """
-    Decoding hyperaparameters.
+    Decoding hyperaparameters of decision tree.
     """
 
     features['criterion'] = round(features['criterion'], 0)
@@ -46,6 +47,20 @@ def decode(var_range, **features):
     list_of_hyperparameters = [(hyperparameter, features[hyperparameter]) for hyperparameter in hyperparameters]
     features = collections.OrderedDict(list_of_hyperparameters)
     return features
+
+def decode_log(var_range, **features):
+    """
+    Decoding hyperaparameters of logistic regression.
+    """
+
+    if features['class_weight'] is not None:
+       features['class_weight'] = int(round(features['class_weight']))
+
+    hyperparameters = ['max_iter', 'tol', 'C', 'l1_ratiofloat', 'class_weight']
+    list_of_hyperparameters = [(hyperparameter, features[hyperparameter]) for hyperparameter in hyperparameters]
+    features = collections.OrderedDict(list_of_hyperparameters)
+    return features
+
 
 def read_data(df_name):
     """
@@ -144,14 +159,14 @@ def print_properties_tree(learner):
     leaves = learner.get_n_leaves()
     return depth, leaves
 
-def train_model(df_name, seed, **features):
+def train_model_dt(df_name, seed, **features):
     """
-    Train classifier.
+    Train classifier (decision tree).
     """
     train = pd.read_csv('./data/train_val_test/' + df_name + '_train_seed_' + str(seed) + '.csv')
     X_train = train.iloc[:, :-1]
     y_train = train.iloc[:, -1]
-    
+
     if features['class_weight'] is not None:
        if(features['criterion'] <= 0.5):
           clf = DecisionTreeClassifier(criterion = 'gini', max_depth = features['max_depth'], min_samples_split = features['min_samples_split'], max_leaf_nodes = features['max_leaf_nodes'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])}, presort = True)
@@ -165,6 +180,23 @@ def train_model(df_name, seed, **features):
 
     learner = clf.fit(X_train, y_train)
     return learner
+
+def train_model_log(df_name, seed, **features):
+    """
+    Train classifier (decision tree).
+    """
+    train = pd.read_csv('./data/train_val_test/' + df_name + '_train_seed_' + str(seed) + '.csv')
+    X_train = train.iloc[:, :-1]
+    y_train = train.iloc[:, -1]
+
+    if features['class_weight'] is not None:
+        clf = LogisticRegression(penalty = 'elasticnet', max_iter = features['max_iter'], tol = features['tol'], C = features['C'], l1_ratio = features['l1_ratiofloat'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])}, solver = 'saga')
+    else:
+        clf = LogisticRegression(penalty = 'elasticnet', max_iter = features['max_iter'], tol = features['tol'], C = features['C'], l1_ratio = features['l1_ratiofloat'], class_weight = features['class_weight'], solver = 'saga')
+
+    learner = clf.fit(X_train, y_train)
+    return learner
+
 
 def save_model(learner, dataset_name, seed, variable_name, num_of_generations, num_of_individuals, individual_id):
     # save the model to disk

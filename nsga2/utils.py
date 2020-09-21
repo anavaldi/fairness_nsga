@@ -20,20 +20,38 @@ class NSGA2Utils:
         population = Population()
         first_individual = True
         for k in range(self.num_of_individuals):
-            if k == 0:
-                individual = self.problem.generate_default_individual_gini()
-                self.problem.calculate_objectives(individual, first_individual, self.problem.seed)
-                population.append(individual)
-                first_individual = False
+            if self.problem.learner_ml == 'decision_tree':
+                if k == 0:
+                    individual = self.problem.generate_default_individual_gini()
+                    self.problem.calculate_objectives_dt(individual, first_individual, self.problem.seed)
+                    population.append(individual)
+                    first_individual = False
 
-            elif k == 1:
-                  individual = self.problem.generate_default_individual_entropy()
-                  self.problem.calculate_objectives(individual, first_individual, self.problem.seed)
-                  population.append(individual)
-            else:
-                individual = self.problem.generate_individual()
-                self.problem.calculate_objectives(individual, first_individual, self.problem.seed)
-                population.append(individual)
+                elif k == 1:
+                      individual = self.problem.generate_default_individual_entropy()
+                      self.problem.calculate_objectives(individual, first_individual, self.problem.seed)
+                      population.append(individual)
+                else:
+                    individual = self.problem.generate_individual_dt()
+                    self.problem.calculate_objectives_dt(individual, first_individual, self.problem.seed)
+                    population.append(individual)
+
+            elif self.problem.learner_ml == 'logistic_regression':
+                if k == 0:
+                    individual = self.problem.generate_default_individual_l1()
+                    self.problem.calculate_objectives_log(individual, first_individual, self.problem.seed)
+                    population.append(individual)
+                    first_individual = False
+
+                elif k == 1:
+                      individual = self.problem.generate_default_individual_l2()
+                      self.problem.calculate_objectives_log(individual, first_individual, self.problem.seed)
+                      population.append(individual)
+                else:
+                    individual = self.problem.generate_individual_log()
+                    self.problem.calculate_objectives_log(individual, first_individual, self.problem.seed)
+                    population.append(individual)
+
         return population
 
     def fast_nondominated_sort(self, population):
@@ -101,17 +119,29 @@ class NSGA2Utils:
             if(prob_mutation_child2 < self.mutation_prob):
                 self.__mutate(child2, self.mutation_prob)
                 child2.creation_mode = "mutation"
-            child1.features = decode(self.problem.variables_range, **child1.features)
-            child2.features = decode(self.problem.variables_range, **child2.features)
-            self.problem.calculate_objectives(child1, first_individual, self.problem.seed)
-            self.problem.calculate_objectives(child2, first_individual, self.problem.seed)
+            if self.problem.learner_ml == 'decision_tree':
+                child1.features = decode_dt(self.problem.variables_range, **child1.features)
+                child2.features = decode_dt(self.problem.variables_range, **child2.features)
+            elif self.problem.learner_ml == 'logistic_regression':
+                child1.features = decode_log(self.problem.variables_range, **child1.features)
+                child2.features = decode_log(self.problem.variables_range, **child2.features)
+            if self.problem.learner_ml == 'decision_tree':
+                self.problem.calculate_objectives_dt(child1, first_individual, self.problem.seed)
+                self.problem.calculate_objectives_dt(child2, first_individual, self.problem.seed)
+            elif self.problem.learner_ml == 'logistic_regression':
+                self.problem.calculate_objectives_log(child1, first_individual, self.problem.seed)
+                self.problem.calculate_objectives_log(child2, first_individual, self.problem.seed)
             children.append(child1)
             children.append(child2)
         return children
 
     def __crossover(self, individual1, individual2):
-        child1 = self.problem.generate_individual()
-        child2 = self.problem.generate_individual()
+        if self.problem.learner_ml == 'decision_tree':
+            child1 = self.problem.generate_individual_dt()
+            child2 = self.problem.generate_individual_dt()
+        if self.problem.learner_ml == 'logistic_regression':
+            child1 = self.problem.generate_individual_log()
+            child2 = self.problem.generate_individual_log()
         child1.creation_mode = "crossover"
         child2.creation_mode = "crossover"
         for hyperparameter in child1.features:
@@ -144,8 +174,12 @@ class NSGA2Utils:
                    child2.features[hyperparameter] = self.problem.variables_range[hyperparameter_index][0]
                 elif child2.features[hyperparameter] > self.problem.variables_range[hyperparameter_index][1]:
                    child2.features[hyperparameter] = self.problem.variables_range[hyperparameter_index][1]
-        child1.features = decode(self.problem.variables_range, **child1.features)
-        child2.features = decode(self.problem.variables_range, **child2.features)
+        if self.problem.learner_ml == 'decision_tree':
+            child1.features = decode_dt(self.problem.variables_range, **child1.features)
+            child2.features = decode_dt(self.problem.variables_range, **child2.features)
+        elif self.problem.learner_ml == 'logistic_regression':
+            child1.features = decode_log(self.problem.variables_range, **child1.features)
+            child2.features = decode_log(self.problem.variables_range, **child2.features)
         return child1, child2
 
     def __get_beta(self):
@@ -165,10 +199,16 @@ class NSGA2Utils:
         if child.features[hyperparameter] is not None:
             if u < 0.5:
                 child.features[hyperparameter] += delta*(child.features[hyperparameter] - self.problem.variables_range[hyperparameter_index][0])
-                child.features = decode(self.problem.variables_range, **child.features)
+                if self.problem.learner_ml == 'decision_tree':
+                    child.features = decode_dt(self.problem.variables_range, **child.features)
+                elif self.problem.learner_ml == 'logistic_regression':
+                    child.features = decode_log(self.problem.variables_range, **child.features)
             else:
                 child.features[hyperparameter] += delta*(self.problem.variables_range[hyperparameter_index][1] - child.features[hyperparameter])
-                child.features = decode(self.problem.variables_range, **child.features)
+                if self.problem.learner_ml == 'decision_tree':
+                    child.features = decode_dt(self.problem.variables_range, **child.features)
+                elif self.problem.learner_ml == 'logistic_regression':
+                    child.features = decode_log(self.problem.variables_range, **child.features)
             if child.features[hyperparameter] < self.problem.variables_range[hyperparameter_index][0]:
                 child.features[hyperparameter] = self.problem.variables_range[hyperparameter_index][0]
             elif child.features[hyperparameter] > self.problem.variables_range[hyperparameter_index][1]:
