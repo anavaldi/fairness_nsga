@@ -95,5 +95,9 @@ for run in range(n_runs):
 
     first = True
     for p in pareto:
-        problem.test_and_save(p,first,problem.seed)
-        first = False
+        if learner == "decision_tree":
+            problem.test_and_save_dt(p,first,problem.seed)
+            first = False
+        elif learner == "logistic_regression":
+            problem.test_and_save_log(p,first,problem.seed)
+            first = False
