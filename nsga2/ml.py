@@ -239,7 +239,6 @@ def test_model(df_name, learner, seed):
     scaler = StandardScaler().fit(X_test)
     X_test = scaler.transform(X_test)
 
-
     y_pred = learner.predict(X_test)
     return X_test, y_test, y_pred
 
