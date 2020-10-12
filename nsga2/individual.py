@@ -36,7 +36,7 @@ class Individual(object):
             and_condition = and_condition and first <= second
             or_condition = or_condition or first < second
             eq_condition = eq_condition and first == second
-            
+
         if self.learner_ml == 'decision_tree':
             if (eq_condition):
                 if ((self.features['max_leaf_nodes'] is None) or (other_individual.features['max_leaf_nodes'] is None)):
@@ -46,3 +46,5 @@ class Individual(object):
                            ((self.actual_leaves == other_individual.actual_leaves) and (self.features['max_leaf_nodes'] < other_individual.features['max_leaf_nodes'])))
             else:
                 return (and_condition and or_condition)
+        else:
+            return (and_condition and or_condition)
