@@ -221,7 +221,7 @@ def val_model(df_name, learner, seed):
     val = pd.read_csv('./data/train_val_test/' + df_name + '_val_seed_' + str(seed) + '.csv')
     X_val = val.iloc[:, :-1]
     y_val = val.iloc[:, -1]
-    
+
     # Normalize features
     scaler = StandardScaler().fit(X_val)
     X_val = scaler.transform(X_val)
@@ -234,6 +234,12 @@ def test_model(df_name, learner, seed):
     test = pd.read_csv('./data/train_val_test/' + df_name + '_test_seed_' + str(seed) + '.csv')
     X_test = test.iloc[:, :-1]
     y_test = test.iloc[:, -1]
+
+    # Normalize features
+    scaler = StandardScaler().fit(X_test)
+    X_test = scaler.transform(X_test)
+
+
     y_pred = learner.predict(X_test)
     return X_test, y_test, y_pred
 
