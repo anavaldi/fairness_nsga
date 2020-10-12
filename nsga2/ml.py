@@ -189,10 +189,14 @@ def train_model_log(df_name, seed, **features):
     X_train = train.iloc[:, :-1]
     y_train = train.iloc[:, -1]
 
-    if features['class_weight'] is not None:
-        clf = LogisticRegression(penalty = 'elasticnet', max_iter = features['max_iter'], tol = features['tol'], C = features['C'], l1_ratio = features['l1_ratiofloat'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])}, solver = 'saga')
-    else:
-        clf = LogisticRegression(penalty = 'elasticnet', max_iter = features['max_iter'], tol = features['tol'], C = features['C'], l1_ratio = features['l1_ratiofloat'], class_weight = features['class_weight'], solver = 'saga')
+    #invert lambda to C
+    C = 1 / features['C']
+
+#    if features['class_weight'] is not None:
+#    clf = LogisticRegression(penalty = 'elasticnet', max_iter = features['max_iter'], tol = features['tol'], C = features['C'], l1_ratio = features['l1_ratiofloat'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])}, solver = 'saga')
+    clf = LogisticRegression(penalty = 'elasticnet', max_iter = features['max_iter'], tol = features['tol'], C = C, l1_ratio = features['l1_ratiofloat'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])}, solver = 'saga')
+#    else:
+#        clf = LogisticRegression(penalty = 'elasticnet', max_iter = features['max_iter'], tol = features['tol'], C = features['C'], l1_ratio = features['l1_ratiofloat'], class_weight = features['class_weight'], solver = 'saga')
 
     learner = clf.fit(X_train, y_train)
     return learner
