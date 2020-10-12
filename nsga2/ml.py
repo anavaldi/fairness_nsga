@@ -188,11 +188,11 @@ def train_model_log(df_name, seed, **features):
     """
     train = pd.read_csv('./data/train_val_test/' + df_name + '_train_seed_' + str(seed) + '.csv')
     X_train = train.iloc[:, :-1]
+    y_train = train.iloc[:, -1]
 
     # Normalize features for logistic regression
     scaler = StandardScaler().fit(X_train)
     X_train = scaler.transform(X_train)
-    y_train = train.iloc[:, -1]
 
     #invert lambda to C
     C = 1 / features['C']
@@ -220,9 +220,13 @@ def val_model(df_name, learner, seed):
     """
     val = pd.read_csv('./data/train_val_test/' + df_name + '_val_seed_' + str(seed) + '.csv')
     X_val = val.iloc[:, :-1]
+    y_val = val.iloc[:, -1]
+    
+    # Normalize features
     scaler = StandardScaler().fit(X_val)
     X_val = scaler.transform(X_val)
-    y_val = val.iloc[:, -1]
+
+
     y_pred = learner.predict(X_val)
     return X_val, y_val, y_pred
 
