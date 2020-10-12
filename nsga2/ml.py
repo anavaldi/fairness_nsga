@@ -214,7 +214,7 @@ def save_model(learner, dataset_name, seed, variable_name, num_of_generations, n
     pickle.dump(learner, open(path + filename, 'wb'))
     return
 
-def val_model(df_name, learner, seed):
+def val_model(df_name, classifier_name, learner, seed):
     """
     Test classifier.
     """
@@ -223,21 +223,23 @@ def val_model(df_name, learner, seed):
     y_val = val.iloc[:, -1]
 
     # Normalize features
-    scaler = StandardScaler().fit(X_val)
-    X_val = scaler.transform(X_val)
+    if classifier_name == 'logistic_regression':
+        scaler = StandardScaler().fit(X_val)
+        X_val = scaler.transform(X_val)
 
 
     y_pred = learner.predict(X_val)
     return X_val, y_val, y_pred
 
-def test_model(df_name, learner, seed):
+def test_model(df_name, classifier_name, learner, seed):
     test = pd.read_csv('./data/train_val_test/' + df_name + '_test_seed_' + str(seed) + '.csv')
     X_test = test.iloc[:, :-1]
     y_test = test.iloc[:, -1]
 
     # Normalize features
-    scaler = StandardScaler().fit(X_test)
-    X_test = scaler.transform(X_test)
+    if classifier_name == 'logistic_regression':
+        scaler = StandardScaler().fit(X_test)
+        X_test = scaler.transform(X_test)
 
     y_pred = learner.predict(X_test)
     return X_test, y_test, y_pred

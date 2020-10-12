@@ -63,7 +63,7 @@ class Problem:
         if self.expand:
             hyperparameters = individual.features
             learner = train_model_dt(self.dataset_name, seed, **hyperparameters)
-            X, y, pred = val_model(self.dataset_name, learner, seed)
+            X, y, pred = val_model(self.dataset_name, self.learner_ml, learner, seed)
             y_fair = evaluate_fairness(X, y, pred, self.variable_name)
             error = gmean_inv(y, pred)
             dem_fp = dem_fpr(y_fair[0], y_fair[1], y_fair[2], y_fair[3])
@@ -88,7 +88,7 @@ class Problem:
             hyperparameters = individual.features
             learner = train_model_dt(self.dataset_name, seed, **hyperparameters)
             save_model(learner, self.dataset_name, seed, self.variable_name, self.num_of_generations, self.num_of_individuals, individual.id)
-            X, y, pred = test_model(self.dataset_name, learner, seed)
+            X, y, pred = test_model(self.dataset_name, self.learner_ml, learner, seed)
             y_fair = evaluate_fairness(X, y, pred, self.variable_name)
             error = gmean_inv(y, pred)
             dem_fp = dem_fpr(y_fair[0], y_fair[1], y_fair[2], y_fair[3])
@@ -135,7 +135,7 @@ class Problem:
         if self.expand:
             hyperparameters = individual.features
             learner = train_model_log(self.dataset_name, seed, **hyperparameters)
-            X, y, pred = val_model(self.dataset_name, learner, seed)
+            X, y, pred = val_model(self.dataset_name, self.learner_ml, learner, seed)
             y_fair = evaluate_fairness(X, y, pred, self.variable_name)
             error = gmean_inv(y, pred)
             dem_fp = dem_fpr(y_fair[0], y_fair[1], y_fair[2], y_fair[3])
@@ -155,7 +155,7 @@ class Problem:
             hyperparameters = individual.features
             learner = train_model_log(self.dataset_name, seed, **hyperparameters)
             save_model(learner, self.dataset_name, seed, self.variable_name, self.num_of_generations, self.num_of_individuals, individual.id)
-            X, y, pred = test_model(self.dataset_name, learner, seed)
+            X, y, pred = test_model(self.dataset_name, self.learner_ml, learner, seed)
             y_fair = evaluate_fairness(X, y, pred, self.variable_name)
             error = gmean_inv(y, pred)
             dem_fp = dem_fpr(y_fair[0], y_fair[1], y_fair[2], y_fair[3])
