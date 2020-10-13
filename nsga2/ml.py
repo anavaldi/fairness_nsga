@@ -3,16 +3,15 @@ import numpy as np
 from sklearn import preprocessing
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import confusion_matrix, accuracy_score, f1_score
 import yaml
 from math import ceil
 import collections
-from sklearn.externals.six import StringIO
+#from sklearn.externals.six import StringIO
 from IPython.display import Image
 from sklearn.tree import export_graphviz
-import pydotplus
+#import pydotplus
 from imblearn.metrics import geometric_mean_score
 
 import pickle
@@ -139,13 +138,13 @@ def get_matrices(df_name, seed):
     return X_train, X_val, X_test, y_train, y_val, y_test
 
 def write_train_val_test(df_name, seed, X_train, X_val, X_test, y_train, y_val, y_test):
-    train = X_train
+    train = pd.DataFrame(X_train)
     train['y'] = y_train.tolist()
     train.to_csv('./data/train_val_test/' + df_name + '_train_seed_' + str(seed) + '.csv', index = False)
-    val = X_val
+    val = pd.DataFrame(X_val)
     val['y'] = y_val.tolist()
     val.to_csv('./data/train_val_test/' + df_name + '_val_seed_' + str(seed) + '.csv', index = False)
-    test = X_test
+    test = pd.DataFrame(X_test)
     test['y'] = y_test.tolist()
     test.to_csv('./data/train_val_test/' + df_name + '_test_seed_' + str(seed) + '.csv', index = False)
 
@@ -190,18 +189,14 @@ def train_model_log(df_name, seed, **features):
     X_train = train.iloc[:, :-1]
     y_train = train.iloc[:, -1]
 
-    # Normalize features for logistic regression
-    scaler = StandardScaler().fit(X_train)
-    X_train = scaler.transform(X_train)
-
     #invert lambda to C
     C = 1 / features['C']
 
-#    if features['class_weight'] is not None:
-#    clf = LogisticRegression(penalty = 'elasticnet', max_iter = features['max_iter'], tol = features['tol'], C = features['C'], l1_ratio = features['l1_ratiofloat'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])}, solver = 'saga')
-    clf = LogisticRegression(penalty = 'elasticnet', max_iter = features['max_iter'], tol = features['tol'], C = C, l1_ratio = features['l1_ratiofloat'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])}, solver = 'saga')
-#    else:
-#        clf = LogisticRegression(penalty = 'elasticnet', max_iter = features['max_iter'], tol = features['tol'], C = features['C'], l1_ratio = features['l1_ratiofloat'], class_weight = features['class_weight'], solver = 'saga')
+    if features['class_weight'] is not None:
+        clf = LogisticRegression(penalty = 'elasticnet', max_iter = features['max_iter'], tol = features['tol'], C = features['C'], l1_ratio = features['l1_ratiofloat'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])}, solver = 'saga')
+    #clf = LogisticRegression(penalty = 'elasticnet', max_iter = features['max_iter'], tol = features['tol'], C = C, l1_ratio = features['l1_ratiofloat'], class_weight = {0:features['class_weight'], 1:(10-features['class_weight'])}, solver = 'saga')
+    else:
+        clf = LogisticRegression(penalty = 'elasticnet', max_iter = features['max_iter'], tol = features['tol'], C = features['C'], l1_ratio = features['l1_ratiofloat'], class_weight = features['class_weight'], solver = 'saga')
 
     learner = clf.fit(X_train, y_train)
     return learner
@@ -214,7 +209,7 @@ def save_model(learner, dataset_name, seed, variable_name, num_of_generations, n
     pickle.dump(learner, open(path + filename, 'wb'))
     return
 
-def val_model(df_name, classifier_name, learner, seed):
+def val_model(df_name, learner, seed):
     """
     Test classifier.
     """
@@ -222,24 +217,13 @@ def val_model(df_name, classifier_name, learner, seed):
     X_val = val.iloc[:, :-1]
     y_val = val.iloc[:, -1]
 
-    # Normalize features
-    if classifier_name == 'logistic_regression':
-        scaler = StandardScaler().fit(X_val)
-        X_val = scaler.transform(X_val)
-
-
     y_pred = learner.predict(X_val)
     return X_val, y_val, y_pred
 
-def test_model(df_name, classifier_name, learner, seed):
+def test_model(df_name, learner, seed):
     test = pd.read_csv('./data/train_val_test/' + df_name + '_test_seed_' + str(seed) + '.csv')
     X_test = test.iloc[:, :-1]
     y_test = test.iloc[:, -1]
-
-    # Normalize features
-    if classifier_name == 'logistic_regression':
-        scaler = StandardScaler().fit(X_test)
-        X_test = scaler.transform(X_test)
 
     y_pred = learner.predict(X_test)
     return X_test, y_test, y_pred
