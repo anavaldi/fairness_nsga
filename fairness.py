@@ -17,8 +17,8 @@ with open('nsga2/config_file.yaml','r') as f:
 # problem parameters
 generations = 300
 individuals = 50
-#dataset = 'adult'; variable = 'race'
-dataset = 'german'; variable = 'age'
+dataset = 'adult'; variable = 'race'
+#dataset = 'german'; variable = 'age'
 #dataset = 'propublica_recidivism'; variable = 'race'
 #dataset = 'propublica_violent_recidivism'; variable = 'race'
 #dataset = 'ricci'; variable = 'Race'
@@ -35,21 +35,22 @@ for run in range(n_runs):
     X_tr, X_v, X_tst, y_tr, y_v, y_tst = get_matrices(dataset, set_seed)
     if learner == 'logistic_regression':
         if dataset == 'adult':
-            X_tr[['age', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week']] = StandardScaler().fit_transform(X_tr[['age', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week']])
-            X_v[['age', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week']] = StandardScaler().fit_transform(X_v[['age', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week']])
-            X_tst[['age', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week']] = StandardScaler().fit_transform(X_tst[['age', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week']])
+            X_tr[['age', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week', 'fnlwgt']] = StandardScaler().fit_transform(X_tr[['age', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week', 'fnlwgt']])
+            X_v[['age', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week', 'fnlwgt']] = StandardScaler().fit_transform(X_v[['age', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week', 'fnlwgt']])
+            X_tst[['age', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week', 'fnlwgt']] = StandardScaler().fit_transform(X_tst[['age', 'education-num', 'capital-gain', 'capital-loss', 'hours-per-week', 'fnlwgt']])
         elif dataset == 'german':
             X_tr[['month', 'credit_amount']] = StandardScaler().fit_transform(X_tr[['month', 'credit_amount']])
             X_v[['month', 'credit_amount']] = StandardScaler().fit_transform(X_v[['month', 'credit_amount']])
             X_tst[['month', 'credit_amount']] = StandardScaler().fit_transform(X_tst[['month', 'credit_amount']])
         elif dataset == 'propublica_recidivism' or dataset == 'propublica_violent_recidivism':
-            X_tr[['age', 'juv_fel_count', 'decile_score', 'juv_misd_count', 'juv_other_count', 'priors_count', 'days_b_screening_arrest', 'c_days_from_compas', 'r_days_from_arrest', 'priors_count', 'start', 'end']] = StandardScaler().fit_transform(X_tr[['age', 'juv_fel_count', 'decile_score', 'juv_misd_count', 'juv_other_count', 'priors_count', 'days_b_screening_arrest', 'c_days_from_compas', 'r_days_from_arrest', 'priors_count', 'start', 'end']])
-            X_v[['age', 'juv_fel_count', 'decile_score', 'juv_misd_count', 'juv_other_count', 'priors_count', 'days_b_screening_arrest', 'c_days_from_compas', 'r_days_from_arrest', 'priors_count', 'start', 'end']] = StandardScaler().fit_transform(X_v[['age', 'juv_fel_count', 'decile_score', 'juv_misd_count', 'juv_other_count', 'priors_count', 'days_b_screening_arrest', 'c_days_from_compas', 'r_days_from_arrest', 'priors_count', 'start', 'end']])
-            X_tst[['age', 'juv_fel_count', 'decile_score', 'juv_misd_count', 'juv_other_count', 'priors_count', 'days_b_screening_arrest', 'c_days_from_compas', 'r_days_from_arrest', 'priors_count', 'start', 'end']] = StandardScaler().fit_transform(X_tst[['age', 'juv_fel_count', 'decile_score', 'juv_misd_count', 'juv_other_count', 'priors_count', 'days_b_screening_arrest', 'c_days_from_compas', 'r_days_from_arrest', 'priors_count', 'start', 'end']])
+            X_tr[['age', 'juv_fel_count', 'juv_misd_count',	'juv_other_count',	'priors_count',	'c_charge_degree', 'c_charge_desc']] = StandardScaler().fit_transform(X_tr[['age', 'juv_fel_count', 'juv_misd_count',	'juv_other_count',	'priors_count',	'c_charge_degree', 'c_charge_desc']])
+            X_v[['age', 'juv_fel_count', 'juv_misd_count',	'juv_other_count',	'priors_count',	'c_charge_degree', 'c_charge_desc']] = StandardScaler().fit_transform(X_v[['age', 'juv_fel_count', 'juv_misd_count',	'juv_other_count',	'priors_count',	'c_charge_degree', 'c_charge_desc']])
+            X_tst[['age', 'juv_fel_count', 'juv_misd_count',	'juv_other_count',	'priors_count',	'c_charge_degree', 'c_charge_desc']] = StandardScaler().fit_transform(X_tst[['age', 'juv_fel_count', 'juv_misd_count',	'juv_other_count',	'priors_count',	'c_charge_degree', 'c_charge_desc']])
         elif dataset == 'ricci':
             X_tr[['Oral', 'Written', 'Combine']] = StandardScaler().fit_transform(X_tr[['Oral', 'Written', 'Combine']])
             X_v[['Oral', 'Written', 'Combine']] = StandardScaler().fit_transform(X_v[['Oral', 'Written', 'Combine']])
             X_tst[['Oral', 'Written', 'Combine']] = StandardScaler().fit_transform(X_tst[['Oral', 'Written', 'Combine']])
+
     write_train_val_test(dataset, set_seed, X_tr, X_v, X_tst, y_tr, y_v, y_tst)
 
     # number of rows in train
