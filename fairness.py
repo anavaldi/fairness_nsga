@@ -17,7 +17,7 @@ with open('nsga2/config_file.yaml','r') as f:
 # problem parameters
 generations = 300
 individuals = 50
-dataset = 'adult'; variable = 'race'
+#dataset = 'adult'; variable = 'race'
 #dataset = 'german'; variable = 'age'
 #dataset = 'propublica_recidivism'; variable = 'race'
 #dataset = 'propublica_violent_recidivism'; variable = 'race'
@@ -47,9 +47,9 @@ for run in range(n_runs):
             X_v[['age', 'juv_fel_count', 'juv_misd_count',	'juv_other_count',	'priors_count',	'c_charge_degree', 'c_charge_desc']] = StandardScaler().fit_transform(X_v[['age', 'juv_fel_count', 'juv_misd_count',	'juv_other_count',	'priors_count',	'c_charge_degree', 'c_charge_desc']])
             X_tst[['age', 'juv_fel_count', 'juv_misd_count',	'juv_other_count',	'priors_count',	'c_charge_degree', 'c_charge_desc']] = StandardScaler().fit_transform(X_tst[['age', 'juv_fel_count', 'juv_misd_count',	'juv_other_count',	'priors_count',	'c_charge_degree', 'c_charge_desc']])
         elif dataset == 'ricci':
-            X_tr[['Oral', 'Written', 'Combine']] = StandardScaler().fit_transform(X_tr[['Oral', 'Written', 'Combine']])
-            X_v[['Oral', 'Written', 'Combine']] = StandardScaler().fit_transform(X_v[['Oral', 'Written', 'Combine']])
-            X_tst[['Oral', 'Written', 'Combine']] = StandardScaler().fit_transform(X_tst[['Oral', 'Written', 'Combine']])
+            X_tr[['Oral', 'Written']] = StandardScaler().fit_transform(X_tr[['Oral', 'Written']])
+            X_v[['Oral', 'Written']] = StandardScaler().fit_transform(X_v[['Oral', 'Written']])
+            X_tst[['Oral', 'Written']] = StandardScaler().fit_transform(X_tst[['Oral', 'Written']])
 
     write_train_val_test(dataset, set_seed, X_tr, X_v, X_tst, y_tr, y_v, y_tst)
 
