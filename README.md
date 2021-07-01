@@ -20,8 +20,9 @@ We conduct an extensive set of experiments based on 5 real-world datasets, which
 **Figure:** Orange dots represent Pareto optimal solutions (minimizing error (1-G-mean) vs. unfairness (FPRdiff)) found by the proposed algorithm in different problems. Dark gray dots indicate the average Pareto set, which is a way of representing *how fair can we go* in a specific problem or, in other words, which shape takes the accuracy-fairness tradeoff. Light gray area is the interquartile range. Our methodology is effective to find a wide spread of solutions that are accurate and fair at the same time. In the two ProPublica datasets, the meta-learning algorithm also finds better solutions than the obtained by COMPAS (red dots), showing that there is a wide range of possibilities to be fairer without worsening accuracy.
 
 
-Please cite as: 
+## Citation:
 
+---
 @article{valdivia2021fair,
   title={How fair can we go in machine learning? Assessing the boundaries of accuracy and fairness},
   author={Valdivia, Ana and S{\'a}nchez-Monedero, Javier and Casillas, Jorge},
@@ -32,3 +33,4 @@ Please cite as:
   year={2021},
   publisher={Wiley Online Library}
 }
+---
