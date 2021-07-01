@@ -14,6 +14,6 @@ We propose a methodology based on the nondominated sorting genetic algorithm II 
 **Figure:** Solutions obtained with decision tree classifiers. Gray dots represent Pareto optimal solutions—minimizing error (I–G-mean) versus unfairness ( FPRdiff)—found by the proposed algorithm in different problems. Violet dots indicate the average Pareto set, which is a way of representing how fair can we go with decision trees in a specific problem or, in other words, which shape takes the accuracy-fairness tradeoff with such a kind of classifier. Light violet area is the interquartile range. Our methodology is effective to find a wide spread of solutions that are accurate and fair at the same time. In the two ProPublica data sets, the meta-learning algorithm also finds better solutions than the obtained by COMPAS (red dots), showing that there is a wide range of possibilities to be fairer without worsening accuracy.
 
 
-## Citation:
+## Citation
 
 Valdivia, A., Sánchez‐Monedero, J., & Casillas, J. (2021). **How fair can we go in machine learning? Assessing the boundaries of accuracy and fairness**. *International Journal of Intelligent Systems*, 36(4), 1619-1643.
