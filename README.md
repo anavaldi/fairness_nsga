@@ -22,15 +22,4 @@ We conduct an extensive set of experiments based on 5 real-world datasets, which
 
 ## Citation:
 
----
-@article{valdivia2021fair,
-  title={How fair can we go in machine learning? Assessing the boundaries of accuracy and fairness},
-  author={Valdivia, Ana and S{\'a}nchez-Monedero, Javier and Casillas, Jorge},
-  journal={International Journal of Intelligent Systems},
-  volume={36},
-  number={4},
-  pages={1619--1643},
-  year={2021},
-  publisher={Wiley Online Library}
-}
----
+Valdivia, A., Sánchez‐Monedero, J., & Casillas, J. (2021). **How fair can we go in machine learning? Assessing the boundaries of accuracy and fairness**. *International Journal of Intelligent Systems*, 36(4), 1619-1643.
