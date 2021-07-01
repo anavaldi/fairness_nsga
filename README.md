@@ -8,12 +8,10 @@ Fair machine learning has been focusing on the development of equitable algorith
 
 We propose a methodology based on the nondominated sorting genetic algorithm II (NSGA-II) to train a set of classifiers that best tradeoff accuracy and fairness. To obtain the Pareto optimal solutions, the meta-heuristic algorithm will optimize the combination of learner parameters. The selection mechanisms are inspired by the elitist NSGA-II method which was described in the previous section. As proof of concept, we tested our methodology with logistic regression and decision trees as base ML classifiers. 
 
-![pareto_frontier_adult](pictures/pareto_frontier_adult.png)
-![pareto_frontier_german](pictures/pareto_frontier_german.png)
-![pareto_frontier_propublica](pictures/pareto_frontier_propublica.png)
-![pareto_frontier_propublica_violent](pictures/pareto_frontier_propublica_violent.png)
+![pareto_frontier_adult](pictures/int22354-fig-0003-m.jpg)
 
-**Figure:** Orange dots represent Pareto optimal solutions (minimizing error (1-G-mean) vs. unfairness (FPRdiff)) found by the proposed algorithm in different problems. Dark gray dots indicate the average Pareto set, which is a way of representing *how fair can we go* in a specific problem or, in other words, which shape takes the accuracy-fairness tradeoff. Light gray area is the interquartile range. Our methodology is effective to find a wide spread of solutions that are accurate and fair at the same time. In the two ProPublica datasets, the meta-learning algorithm also finds better solutions than the obtained by COMPAS (red dots), showing that there is a wide range of possibilities to be fairer without worsening accuracy.
+
+**Figure:** Solutions obtained with decision tree classifiers. Gray dots represent Pareto optimal solutions—minimizing error (I–G-mean) versus unfairness ( FPRdiff)—found by the proposed algorithm in different problems. Violet dots indicate the average Pareto set, which is a way of representing how fair can we go with decision trees in a specific problem or, in other words, which shape takes the accuracy-fairness tradeoff with such a kind of classifier. Light violet area is the interquartile range. Our methodology is effective to find a wide spread of solutions that are accurate and fair at the same time. In the two ProPublica data sets, the meta-learning algorithm also finds better solutions than the obtained by COMPAS (red dots), showing that there is a wide range of possibilities to be fairer without worsening accuracy.
 
 
 ## Citation:
