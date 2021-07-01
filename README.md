@@ -1,16 +1,12 @@
-# How fair can we go in machine learning? Assessing the boundaries of fairness in decision trees
+# How fair can we go in machine learning? Assessing the boundaries of accuracy and fairness 
 
 ## Abstract
 
-Fair machine learning works have been focusing on the development of equitable algorithms that address discrimination of certain groups. Yet, many of these fairness-aware approaches aim to obtain a unique solution to the problem, which leads to a poor understanding of the statistical limits of bias mitigation interventions.
-
-We present the first methodology that allows to explore those limits within a multi-objective framework that seeks to optimize any measure of accuracy and fairness and provides a Pareto front with the best feasible solutions. In this work, we focus our study on decision tree classifiers since they are widely accepted in machine learning, are easy to interpret and can deal with non-numerical information naturally.
-
-We conclude experimentally that our method can optimize decision tree models by being fairer with a small cost of the classification error. We believe that our contribution will help stakeholders of sociotechnical systems to assess how far they can go being fair and accurate, thus serving in the support of enhanced decision making where machine learning is used.
+Fair machine learning has been focusing on the development of equitable algorithms that address discrimination. Yet, many of these fairness-aware approaches aim to obtain a unique solution to the problem, which leads to a poor understanding of the statistical limits of bias mitigation interventions. In this study, a novel methodology is presented to explore the tradeoff in terms of a Pareto front between accuracy and fairness. To this end, we propose a multiobjective framework that seeks to optimize both measures. The experimental framework is focused on logistic regression and decision tree classifiers since they are well-known by the machine learning community. We conclude experimentally that our method can optimize classifiers by being fairer with a small cost on the classification accuracy. We believe that our contribution will help stakeholders of sociotechnical systems to assess how far they can go being fair and accurate, thus serving in the support of enhanced decision making where machine learning is used.
 
 ## Experimentation
 
-We conduct an extensive set of experiments based on 5 real-world datasets, which are widely used in the fairness literature. The solution space obtained by our approach indicates that thereexists a wide number of optimal solutions (Pareto optimal), that are characterized by not being dominated by each other. We also evaluate the boundaries between accuracy and fairness that canbe achieved on each problem, giving an empirical visualization of the limits between both measures. In addition, we assess how decision trees hyperparameters are affected by this tradeoff. Finally, a convergence analysis is also presented in order to evaluate theevolutionary approach of this methodology.
+We propose a methodology based on the nondominated sorting genetic algorithm II (NSGA-II) to train a set of classifiers that best tradeoff accuracy and fairness. To obtain the Pareto optimal solutions, the meta-heuristic algorithm will optimize the combination of learner parameters. The selection mechanisms are inspired by the elitist NSGA-II method which was described in the previous section. As proof of concept, we tested our methodology with logistic regression and decision trees as base ML classifiers. 
 
 ![pareto_frontier_adult](pictures/pareto_frontier_adult.png)
 ![pareto_frontier_german](pictures/pareto_frontier_german.png)
